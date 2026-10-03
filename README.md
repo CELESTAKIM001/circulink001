@@ -1,25 +1,32 @@
 # CIRCULINK — TUNA TAKA TAKA
 
-A Vercel-ready circular-economy marketplace connecting recoverable materials with people and businesses that can reuse, repair, transform, or recycle them.
+Vercel-ready Next.js marketplace for matching reusable, recyclable, repairable and recoverable materials with people and organizations that can use them.
 
-## Core flows
-- Registration as Source / Individual with Trash / Company
+## Included
+- Microsoft Fluent-inspired interface and Fluent UI icons
+- CIRCULINK logo splash/startup experience
+- Source / Individual with Trash / Company registration
 - Email OTP verification
-- Material listing and marketplace discovery
-- Map-enabled pickup locations using OpenStreetMap/Leaflet
-- Add-to-cart and checkout
-- Daraja Buy Goods payment initialization + callback recording
-- Receipt QR verification + email delivery
-- Collector pickup scheduling
-- Admin command center with operational, payments, messaging, sustainability and system controls
-- Contact and notification workflows
+- Marketplace and material submission
+- Bottle tops, paper, textiles, construction materials, electronics, laptops, machines and parts
+- Leaflet + OpenStreetMap pickup mapping
+- Cart and checkout
+- Safaricom Daraja CustomerBuyGoodsOnline STK Push architecture
+- Dynamic `/api/mpesa/callback` callback
+- MongoDB transaction/payment/receipt records
+- QR receipt verification
+- PDF receipt generation
+- Gmail SMTP receipt/contact/OTP delivery
+- Admin command center and protected admin metrics
+- 88 documented architecture areas
+- SDG and sustainability documentation
+- Vercel deployment documentation
 
 ## Deployment
-1. Import the repository into Vercel.
-2. Add variables from `.env.example` in Vercel Project Settings.
-3. Set `SMTP_PASSWORD` to a Google App Password.
-4. Use production Daraja credentials only in Vercel server-side environment variables.
-5. Ensure the Daraja callback points to `/api/mpesa/callback`.
-6. Allow the Vercel deployment host in MongoDB Atlas Network Access.
+1. Upload this repository to GitHub.
+2. Deploy the repository with Vercel using the repository root (`.`).
+3. Add the variables from `.env.example` in Vercel.
+4. Set `MPESA_CALLBACK_URL` to `https://YOUR-DOMAIN/api/mpesa/callback`.
+5. After MongoDB is configured, run the index and admin seed scripts from a secure environment.
 
-The application uses a Segoe UI system font stack and Microsoft Fluent UI icons; no AI-themed typography or emoji UI is used.
+Never commit `.env`, real Daraja credentials, MongoDB passwords, SMTP passwords or JWT secrets.
