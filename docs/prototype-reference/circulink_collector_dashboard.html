@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CIRCULINK Collector & Hub Dashboard - Tuna Taka Taka</title>
+  
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    :root {
+      --fluent-primary: #107c41;
+      --fluent-primary-dark: #0b582e;
+      --fluent-secondary: #00796b;
+      --fluent-accent-blue: #0284c7;
+      --fluent-amber: #d97706;
+      --fluent-bg: #f4f6f4;
+      --fluent-card-bg: #ffffff;
+      --fluent-text-primary: #1f2937;
+      --fluent-text-secondary: #6b7280;
+      --fluent-shadow-depth-8: 0 3.2px 7.2px 0 rgba(0,0,0,0.11), 0 0.6px 1.8px 0 rgba(0,0,0,0.08);
+      --fluent-shadow-depth-16: 0 6.4px 14.4px 0 rgba(0,0,0,0.13), 0 1.2px 3.6px 0 rgba(0,0,0,0.10);
+      --fluent-shadow-depth-64: 0 25.6px 57.6px 0 rgba(0,0,0,0.22), 0 4.8px 14.4px 0 rgba(0,0,0,0.18);
+    }
+
+    body {
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+      background-color: var(--fluent-bg);
+      color: var(--fluent-text-primary);
+      overflow-x: hidden;
+    }
+
+    /* Fluent Acrylic Backdrop */
+    .fluent-acrylic {
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border-right: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .fluent-header-glass {
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .fluent-card {
+      background: var(--fluent-card-bg);
+      border-radius: 8px;
+      box-shadow: var(--fluent-shadow-depth-8);
+      border: 1px solid rgba(0, 0, 0, 0.06);
+      transition: all 0.2s cubic-bezier(0.1, 0.9, 0.2, 1);
+    }
+
+    .fluent-card:hover {
+      box-shadow: var(--fluent-shadow-depth-16);
+    }
+
+    .fluent-input {
+      border: 1px solid #d1d5db;
+      border-bottom: 2px solid #6b7280;
+      border-radius: 4px;
+      background-color: #ffffff;
+      transition: all 0.2s ease;
+    }
+
+    .fluent-input:focus {
+      outline: none;
+      border-bottom-color: var(--fluent-primary);
+      box-shadow: 0 2px 4px rgba(16, 124, 65, 0.15);
+    }
+
+    .fluent-btn-primary {
+      background-color: var(--fluent-primary);
+      color: #ffffff;
+      border-radius: 4px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.12);
+    }
+
+    .fluent-btn-primary:hover {
+      background-color: var(--fluent-primary-dark);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.18);
+    }
+
+    .fluent-btn-secondary {
+      background-color: #f3f4f6;
+      color: var(--fluent-text-primary);
+      border: 1px solid #d1d5db;
+      border-radius: 4px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .fluent-btn-secondary:hover {
+      background-color: #e5e7eb;
+    }
+
+    .modal-backdrop {
+      background-color: rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(6px);
+    }
+
+    /* Pulse Radar Animation for Field Map */
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.3); opacity: 0.2; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+    .pulse-radar {
+      animation: pulse-ring 2s infinite ease-in-out;
+    }
+
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a8a8a8;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col md:flex-row">
+
+  <!-- Sidebar -->
+  <aside id="sidebar" class="w-64 fluent-acrylic fixed md:sticky top-0 h-screen z-40 flex flex-col justify-between shrink-0 shadow-lg md:shadow-none transition-all duration-300">
+    
+    <div>
+      <!-- Brand & Mode Title -->
+      <div class="h-16 px-4 flex items-center justify-between border-b border-gray-200/80">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-lg bg-emerald-700 flex items-center justify-center text-white shadow-md">
+            <i class="fa-solid fa-truck-field text-base"></i>
+          </div>
+          <div>
+            <span class="text-sm font-bold tracking-tight text-gray-900 block leading-tight">CIRCULINK</span>
+            <span class="text-[10px] font-extrabold text-emerald-700 tracking-wider uppercase">Collector Ops</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mode Switcher Pill Banner -->
+      <div class="p-3">
+        <div class="bg-gray-200/70 p-1 rounded-lg flex text-xs font-bold">
+          <button id="btnRoleDriver" onclick="switchMode('driver')" class="flex-1 py-1.5 rounded-md bg-white text-emerald-800 shadow-sm flex items-center justify-center gap-1.5 transition-all">
+            <i class="fa-solid fa-truck"></i> Driver
+          </button>
+          <button id="btnRoleHub" onclick="switchMode('hub')" class="flex-1 py-1.5 rounded-md text-gray-600 hover:text-gray-900 flex items-center justify-center gap-1.5 transition-all">
+            <i class="fa-solid fa-warehouse"></i> Hub Sorting
+          </button>
+        </div>
+      </div>
+
+      <!-- Nav Items -->
+      <nav class="p-3 space-y-1 text-xs font-semibold">
+        <a href="#dispatch-queue" onclick="navHighlight(this)" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-md text-emerald-800 bg-emerald-50/80 font-bold border-l-4 border-emerald-700">
+          <i class="fa-solid fa-list-check w-4 text-center text-emerald-700"></i>
+          <span>Pickup Queue</span>
+          <span class="ml-auto bg-emerald-700 text-white text-[10px] font-bold px-2 py-0.5 rounded-full" id="queueBadge">4</span>
+        </a>
+
+        <a href="#route-planner" onclick="navHighlight(this)" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-md text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors">
+          <i class="fa-solid fa-route w-4 text-center text-gray-500"></i>
+          <span>Route &amp; GPS Map</span>
+        </a>
+
+        <a href="#scale-terminal" onclick="navHighlight(this)" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-md text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors">
+          <i class="fa-solid fa-scale-balanced w-4 text-center text-gray-500"></i>
+          <span>Scale &amp; Weighing</span>
+        </a>
+
+        <a href="#offtaker-hub" onclick="navHighlight(this)" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-md text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors">
+          <i class="fa-solid fa-boxes-packing w-4 text-center text-gray-500"></i>
+          <span>Off-taker Batches</span>
+        </a>
+
+        <a href="#payouts-log" onclick="navHighlight(this)" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-md text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors">
+          <i class="fa-solid fa-mobile-screen-button w-4 text-center text-gray-500"></i>
+          <span>M-Pesa Dispatches</span>
+        </a>
+      </nav>
+    </div>
+
+    <!-- Active Collector Info Footer -->
+    <div class="p-3 border-t border-gray-200/80 bg-gray-50/60">
+      <div class="flex items-center gap-2.5">
+        <div class="relative">
+          <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80" alt="Collector" class="w-9 h-9 rounded-full object-cover border-2 border-emerald-600">
+          <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white"></span>
+        </div>
+        <div class="overflow-hidden">
+          <div class="text-xs font-bold text-gray-900 truncate" id="collectorName">Kevin Mutua</div>
+          <div class="text-[10px] text-emerald-800 font-semibold truncate" id="collectorVehicle">Nyeri Youth Sacco • KCG 482L</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content Layout -->
+  <main class="flex-1 min-w-0 p-3 sm:p-5 lg:p-7 space-y-6">
+
+    <!-- Top Header Bar -->
+    <header class="fluent-header-glass sticky top-0 z-30 p-4 rounded-xl border border-gray-200/80 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div>
+        <div class="flex items-center gap-2">
+          <span id="roleTag" class="px-2.5 py-0.5 rounded text-[10px] font-extrabold uppercase bg-emerald-100 text-emerald-800 border border-emerald-300">FIELD DRIVER MODE</span>
+          <span class="text-xs text-gray-500 font-medium"><i class="fa-solid fa-location-dot text-emerald-700"></i> Nairobi Central Sector</span>
+        </div>
+        <h1 class="text-xl sm:text-2xl font-bold text-gray-900 mt-1" id="headerTitle">Field Collection &amp; Route Terminal</h1>
+      </div>
+
+      <!-- Quick Action Controls -->
+      <div class="flex items-center gap-2.5 w-full sm:w-auto justify-end">
+        <button onclick="openWeighScaleModal()" class="fluent-btn-primary px-3.5 py-2 text-xs flex items-center gap-2 shadow-sm">
+          <i class="fa-solid fa-scale-balanced"></i> Weigh &amp; Pay
+        </button>
+        <button onclick="triggerSimulatedGPS()" class="fluent-btn-secondary px-3 py-2 text-xs flex items-center gap-2">
+          <i class="fa-solid fa-crosshairs text-emerald-700"></i> Sync GPS
+        </button>
+      </div>
+    </header>
+
+    <!-- KPI Summary Dashboard Row -->
+    <section class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
+      
+      <!-- Metric 1 -->
+      <div class="fluent-card p-4 relative overflow-hidden border-l-4 border-l-emerald-600">
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] font-extrabold text-gray-500 uppercase">Today's Volume</span>
+          <span class="w-7 h-7 rounded-full bg-emerald-50 text-emerald-700 flex items-center justify-center text-xs">
+            <i class="fa-solid fa-dumpster"></i>
+          </span>
+        </div>
+        <div class="mt-2 flex items-baseline gap-1.5">
+          <span class="text-2xl font-bold text-gray-900" id="kpiVolume">342.5</span>
+          <span class="text-xs font-semibold text-gray-500">kg</span>
+        </div>
+        <div class="mt-1 text-[11px] text-emerald-700 font-bold flex items-center gap-1">
+          <i class="fa-solid fa-circle-check"></i> 82% of Target (400kg)
+        </div>
+      </div>
+
+      <!-- Metric 2 -->
+      <div class="fluent-card p-4 relative overflow-hidden border-l-4 border-l-amber-500">
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] font-extrabold text-gray-500 uppercase">Dispatched Payouts</span>
+          <span class="w-7 h-7 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center text-xs">
+            <i class="fa-solid fa-money-bill-wave"></i>
+          </span>
+        </div>
+        <div class="mt-2 flex items-baseline gap-1.5">
+          <span class="text-2xl font-bold text-gray-900" id="kpiPayouts">7,840</span>
+          <span class="text-xs font-semibold text-gray-500">KSh</span>
+        </div>
+        <div class="mt-1 text-[11px] text-amber-700 font-bold flex items-center gap-1">
+          <i class="fa-solid fa-bolt"></i> Via M-Pesa B2C Instant
+        </div>
+      </div>
+
+      <!-- Metric 3 -->
+      <div class="fluent-card p-4 relative overflow-hidden border-l-4 border-l-teal-600">
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] font-extrabold text-gray-500 uppercase">Completed Pickups</span>
+          <span class="w-7 h-7 rounded-full bg-teal-50 text-teal-700 flex items-center justify-center text-xs">
+            <i class="fa-solid fa-circle-check"></i>
+          </span>
+        </div>
+        <div class="mt-2 flex items-baseline gap-1.5">
+          <span class="text-2xl font-bold text-gray-900" id="kpiCompleted">6</span>
+          <span class="text-xs font-semibold text-gray-500">of 10 Jobs</span>
+        </div>
+        <div class="mt-1 text-[11px] text-teal-700 font-bold flex items-center gap-1">
+          <i class="fa-solid fa-truck-clock"></i> Avg time: 14m/stop
+        </div>
+      </div>
+
+      <!-- Metric 4 -->
+      <div class="fluent-card p-4 relative overflow-hidden border-l-4 border-l-blue-600">
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] font-extrabold text-gray-500 uppercase">Driver Commission</span>
+          <span class="w-7 h-7 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-xs">
+            <i class="fa-solid fa-hand-holding-dollar"></i>
+          </span>
+        </div>
+        <div class="mt-2 flex items-baseline gap-1.5">
+          <span class="text-2xl font-bold text-gray-900" id="kpiCommission">1,420</span>
+          <span class="text-xs font-semibold text-gray-500">KSh</span>
+        </div>
+        <div class="mt-1 text-[11px] text-blue-700 font-bold flex items-center gap-1">
+          <i class="fa-solid fa-circle-arrow-up"></i> +15% performance bonus
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Dispatch Queue & Live Route Section (Grid Split) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      
+      <!-- Left Column: Pickup Queue (5 cols) -->
+      <div id="dispatch-queue" class="lg:col-span-5 space-y-4">
+        <div class="fluent-card p-4 bg-white">
+          <div class="flex items-center justify-between pb-3 border-b border-gray-100">
+            <div>
+              <h2 class="text-sm font-bold text-gray-900 flex items-center gap-2">
+                <i class="fa-solid fa-clipboard-list text-emerald-700"></i> Dispatch Task Queue
+              </h2>
+              <p class="text-[11px] text-gray-500">Nairobi &amp; Nyeri sector field collections</p>
+            </div>
+            
+            <div class="flex gap-1 bg-gray-100 p-1 rounded-md text-[10px] font-bold">
+              <button onclick="filterQueue('all')" id="qTabAll" class="px-2 py-1 rounded bg-white text-gray-900 shadow-sm">All</button>
+              <button onclick="filterQueue('pending')" id="qTabPending" class="px-2 py-1 rounded text-gray-600">Pending</button>
+              <button onclick="filterQueue('enroute')" id="qTabEnroute" class="px-2 py-1 rounded text-gray-600">Active</button>
+            </div>
+          </div>
+
+          <!-- List of Queue Cards -->
+          <div id="queueListContainer" class="mt-3 space-y-3 max-h-[520px] overflow-y-auto pr-1">
+            <!-- Cards rendered dynamically via JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Interactive Route & GPS Map Simulation (7 cols) -->
+      <div id="route-planner" class="lg:col-span-7 space-y-4">
+        <div class="fluent-card p-4 bg-white">
+          <div class="flex items-center justify-between pb-3 border-b border-gray-100">
+            <div>
+              <h2 class="text-sm font-bold text-gray-900 flex items-center gap-2">
+                <i class="fa-solid fa-map-location-dot text-emerald-700"></i> Live Geospatial Route Optimization
+              </h2>
+              <p class="text-[11px] text-gray-500">Real-time GPS sequencing for minimal fuel &amp; quickest collection</p>
+            </div>
+            <div class="text-right">
+              <span class="text-xs font-bold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded border border-emerald-200 block">
+                Total Route: 14.2 km • Est. 42 min
+              </span>
+            </div>
+          </div>
+
+          <!-- Map Visualizer Container -->
+          <div class="relative w-full h-[320px] sm:h-[380px] bg-slate-900 rounded-lg overflow-hidden my-3 border border-gray-300">
+            <!-- Simulated Map Canvas Background -->
+            <div class="absolute inset-0 opacity-40 bg-[radial-gradient(#38bdf8_1px,transparent_1px)] [background-size:20px_20px]"></div>
+            
+            <!-- Grid Lines Simulation -->
+            <svg class="absolute inset-0 w-full h-full pointer-events-none stroke-emerald-500/30" stroke-width="2" stroke-dasharray="4">
+              <path d="M 50 180 Q 180 80 320 220 T 580 120" fill="none" />
+            </svg>
+
+            <!-- Map Markers -->
+            <!-- Marker 1: Current Driver Truck -->
+            <div class="absolute top-[45%] left-[20%] transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center z-20 cursor-pointer">
+              <div class="w-9 h-9 rounded-full bg-emerald-600 text-white flex items-center justify-center text-sm shadow-lg border-2 border-white ring-4 ring-emerald-500/30 pulse-radar">
+                <i class="fa-solid fa-truck"></i>
+              </div>
+              <span class="mt-1 bg-black/80 text-white text-[9px] font-bold px-2 py-0.5 rounded shadow">
+                DRIVER: KCG 482L
+              </span>
+            </div>
+
+            <!-- Marker 2: Kilimani Pickup -->
+            <div onclick="selectStopFromMap('CLK-2041')" class="absolute top-[25%] left-[50%] transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center z-10 cursor-pointer group">
+              <div class="w-7 h-7 rounded-full bg-amber-500 text-white flex items-center justify-center text-xs shadow-md group-hover:scale-125 transition-transform border-2 border-white">
+                1
+              </div>
+              <span class="mt-1 bg-white/90 text-gray-900 text-[9px] font-bold px-1.5 py-0.5 rounded shadow">
+                Kilimani (EST: 45kg)
+              </span>
+            </div>
+
+            <!-- Marker 3: Westlands Pickup -->
+            <div onclick="selectStopFromMap('CLK-2042')" class="absolute top-[60%] left-[65%] transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center z-10 cursor-pointer group">
+              <div class="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs shadow-md group-hover:scale-125 transition-transform border-2 border-white">
+                2
+              </div>
+              <span class="mt-1 bg-white/90 text-gray-900 text-[9px] font-bold px-1.5 py-0.5 rounded shadow">
+                Westlands (EST: 120kg)
+              </span>
+            </div>
+
+            <!-- Marker 4: MRF Sorting Hub Target -->
+            <div class="absolute top-[30%] left-[85%] transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center z-10 cursor-pointer">
+              <div class="w-8 h-8 rounded-lg bg-teal-800 text-white flex items-center justify-center text-xs shadow-lg border-2 border-white">
+                <i class="fa-solid fa-warehouse"></i>
+              </div>
+              <span class="mt-1 bg-teal-900 text-white text-[9px] font-bold px-1.5 py-0.5 rounded shadow">
+                Nairobi Central Hub
+              </span>
+            </div>
+
+            <!-- GPS Live Direction HUD Overlay -->
+            <div class="absolute bottom-3 left-3 right-3 bg-white/95 backdrop-blur-md p-3 rounded-lg border border-gray-200 shadow-lg flex items-center justify-between text-xs">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded bg-emerald-700 text-white flex items-center justify-center text-sm">
+                  <i class="fa-solid fa-turn-up text-amber-300"></i>
+                </div>
+                <div>
+                  <div class="font-bold text-gray-900">In 350m: Turn Right onto Argwings Kodhek Rd</div>
+                  <div class="text-[10px] text-gray-500">Next Stop: Jane Doe (Kilimani Estate, Block C)</div>
+                </div>
+              </div>
+              <button onclick="openWeighScaleModal('CLK-2041')" class="fluent-btn-primary px-3 py-1.5 text-xs shrink-0">
+                Arrived at Stop
+              </button>
+            </div>
+          </div>
+
+          <!-- Turn-By-Turn Sequence List -->
+          <div class="mt-3 pt-3 border-t border-gray-100">
+            <h3 class="text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Sequential Stop Orders</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+              <div class="p-2 rounded bg-amber-50 border border-amber-200 flex items-center gap-2">
+                <span class="w-5 h-5 rounded-full bg-amber-600 text-white text-[10px] font-bold flex items-center justify-center shrink-0">1</span>
+                <div class="truncate">
+                  <strong class="block truncate">Kilimani Estate</strong>
+                  <span class="text-[10px] text-gray-500">ETA: 6 Mins • 2.1 km</span>
+                </div>
+              </div>
+              <div class="p-2 rounded bg-gray-50 border border-gray-200 flex items-center gap-2 opacity-80">
+                <span class="w-5 h-5 rounded-full bg-gray-600 text-white text-[10px] font-bold flex items-center justify-center shrink-0">2</span>
+                <div class="truncate">
+                  <strong class="block truncate">Westlands Commercial</strong>
+                  <span class="text-[10px] text-gray-500">ETA: 22 Mins • 6.4 km</span>
+                </div>
+              </div>
+              <div class="p-2 rounded bg-gray-50 border border-gray-200 flex items-center gap-2 opacity-80">
+                <span class="w-5 h-5 rounded-full bg-gray-600 text-white text-[10px] font-bold flex items-center justify-center shrink-0">3</span>
+                <div class="truncate">
+                  <strong class="block truncate">Kasarani Drop Point</strong>
+                  <span class="text-[10px] text-gray-500">ETA: 40 Mins • 12.0 km</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Scale & Weighing Terminal Simulator Section -->
+    <section id="scale-terminal" class="fluent-card p-5 bg-white border-t-4 border-t-emerald-700">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-gray-200">
+        <div>
+          <h2 class="text-base font-bold text-gray-900 flex items-center gap-2">
+            <i class="fa-solid fa-scale-balanced text-emerald-700"></i> Field Scale &amp; On-Site Weighing Terminal
+          </h2>
+          <p class="text-xs text-gray-500">Weigh incoming segregated waste, compute instant generator payout, and send M-Pesa token</p>
+        </div>
+        <span class="text-xs font-semibold px-2.5 py-1 rounded bg-emerald-100 text-emerald-800 border border-emerald-200 self-start sm:self-auto">
+          <i class="fa-solid fa-wifi mr-1"></i> Bluetooth Smart Scale Connected: <strong>CIRCUSCALE-v4</strong>
+        </span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-6 mt-4">
+        
+        <!-- Live Material Weight Inputs (7 cols) -->
+        <div class="md:col-span-7 space-y-3">
+          <h3 class="text-xs font-bold text-gray-700 uppercase tracking-wider">Breakdown by Waste Material Type</h3>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            
+            <!-- PET Plastic -->
+            <div class="p-3 rounded-lg border border-gray-200 bg-gray-50/50 flex items-center justify-between">
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold">
+                  PET
+                </div>
+                <div>
+                  <div class="text-xs font-bold text-gray-900">PET Plastic Bottles</div>
+                  <div class="text-[10px] text-emerald-700 font-semibold">28 KSh / kg</div>
+                </div>
+              </div>
+              <div class="w-24">
+                <input type="number" id="scalePET" value="12.5" step="0.5" oninput="recalculateTerminal()" class="w-full p-1.5 fluent-input text-right text-xs font-bold">
+              </div>
+            </div>
+
+            <!-- HDPE Rigid Plastic -->
+            <div class="p-3 rounded-lg border border-gray-200 bg-gray-50/50 flex items-center justify-between">
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded bg-cyan-100 text-cyan-700 flex items-center justify-center text-xs font-bold">
+                  HDPE
+                </div>
+                <div>
+                  <div class="text-xs font-bold text-gray-900">Rigid Plastics (Containers)</div>
+                  <div class="text-[10px] text-emerald-700 font-semibold">32 KSh / kg</div>
+                </div>
+              </div>
+              <div class="w-24">
+                <input type="number" id="scaleHDPE" value="5.0" step="0.5" oninput="recalculateTerminal()" class="w-full p-1.5 fluent-input text-right text-xs font-bold">
+              </div>
+            </div>
+
+            <!-- Organic Waste -->
+            <div class="p-3 rounded-lg border border-gray-200 bg-gray-50/50 flex items-center justify-between">
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded bg-amber-100 text-amber-700 flex items-center justify-center text-xs font-bold">
+                  ORG
+                </div>
+                <div>
+                  <div class="text-xs font-bold text-gray-900">Organic / Food Waste</div>
+                  <div class="text-[10px] text-emerald-700 font-semibold">12 KSh / kg</div>
+                </div>
+              </div>
+              <div class="w-24">
+                <input type="number" id="scaleORG" value="18.0" step="0.5" oninput="recalculateTerminal()" class="w-full p-1.5 fluent-input text-right text-xs font-bold">
+              </div>
+            </div>
+
+            <!-- Glass Bottles -->
+            <div class="p-3 rounded-lg border border-gray-200 bg-gray-50/50 flex items-center justify-between">
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded bg-purple-100 text-purple-700 flex items-center justify-center text-xs font-bold">
+                  GLS
+                </div>
+                <div>
+                  <div class="text-xs font-bold text-gray-900">Glass &amp; EABL Bottles</div>
+                  <div class="text-[10px] text-emerald-700 font-semibold">18 KSh / kg</div>
+                </div>
+              </div>
+              <div class="w-24">
+                <input type="number" id="scaleGLS" value="8.0" step="0.5" oninput="recalculateTerminal()" class="w-full p-1.5 fluent-input text-right text-xs font-bold">
+              </div>
+            </div>
+
+          </div>
+
+          <div class="p-3 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center justify-between">
+            <span class="text-xs font-bold text-emerald-900 uppercase">Gross Verified Weight</span>
+            <span class="text-lg font-extrabold text-emerald-800" id="scaleTotalKg">43.5 kg</span>
+          </div>
+        </div>
+
+        <!-- M-Pesa Payout Summary Box (5 cols) -->
+        <div class="md:col-span-5 bg-slate-900 text-white rounded-lg p-5 flex flex-col justify-between shadow-xl space-y-4">
+          <div>
+            <div class="flex items-center justify-between border-b border-slate-700 pb-3">
+              <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider">Instant Generator Payout</span>
+              <span class="text-xs bg-emerald-900/80 text-emerald-300 font-semibold px-2 py-0.5 rounded border border-emerald-700">M-PESA B2C</span>
+            </div>
+
+            <div class="my-4">
+              <div class="text-[10px] text-slate-400 uppercase font-semibold">Recipient Mobile Number</div>
+              <input type="text" id="scaleMpesaPhone" value="+254 712 345 678" class="w-full mt-1 p-2 bg-slate-800 border border-slate-700 rounded text-xs font-mono font-bold text-emerald-300">
+            </div>
+
+            <div class="space-y-1.5 text-xs text-slate-300 border-t border-slate-800 pt-3">
+              <div class="flex justify-between">
+                <span>Material Payout Sum:</span>
+                <span id="scaleSubtotal" class="font-semibold text-white">886.00 KSh</span>
+              </div>
+              <div class="flex justify-between">
+                <span>Sorting Quality Bonus (+10%):</span>
+                <span id="scaleBonus" class="font-semibold text-emerald-400">+88.60 KSh</span>
+              </div>
+              <div class="flex justify-between text-sm font-bold text-white pt-2 border-t border-slate-700">
+                <span>Total Disbursement:</span>
+                <span id="scaleNetPayout" class="text-emerald-400 text-base">974.60 KSh</span>
+              </div>
+            </div>
+          </div>
+
+          <button onclick="dispatchMpesaPayout()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg transition-all">
+            <i class="fa-solid fa-paper-plane"></i> Authorize &amp; Send M-Pesa
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Off-taker Material Batch Sorting Hub Tracker -->
+    <section id="offtaker-hub" class="fluent-card p-5 bg-white">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-gray-200">
+        <div>
+          <h2 class="text-base font-bold text-gray-900 flex items-center gap-2">
+            <i class="fa-solid fa-boxes-packing text-emerald-700"></i> Material Sorting &amp; Off-taker Hub Batches
+          </h2>
+          <p class="text-xs text-gray-500">Group collected materials into commercial off-taker bails for industrial recyclers</p>
+        </div>
+        <button onclick="openCreateBatchModal()" class="fluent-btn-primary px-3 py-1.5 text-xs flex items-center gap-1.5 self-start sm:self-auto">
+          <i class="fa-solid fa-plus"></i> Assemble New Off-taker Batch
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
+        
+        <!-- Off-taker Card 1: Mr. Green Africa -->
+        <div class="p-4 rounded-lg border border-gray-200 bg-gray-50/50 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-extrabold px-2 py-0.5 rounded bg-blue-100 text-blue-800">RIGID PLASTICS</span>
+            <span class="text-xs font-bold text-gray-500">Batch #MGA-882</span>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-gray-900">Mr. Green Africa</h3>
+            <p class="text-[11px] text-gray-500">Off-taker: Rigid HDPE/PP Plastics</p>
+          </div>
+          <div class="space-y-1">
+            <div class="flex justify-between text-xs font-bold">
+              <span>Bale Mass: 1,240 kg</span>
+              <span class="text-emerald-700">82% Full</span>
+            </div>
+            <div class="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div class="h-full bg-emerald-600 rounded-full" style="width: 82%;"></div>
+            </div>
+          </div>
+          <button onclick="showToast('Batch #MGA-882 queued for truck pickup')" class="w-full py-1.5 fluent-btn-secondary text-xs">Dispatch to Off-taker</button>
+        </div>
+
+        <!-- Off-taker Card 2: PETCO Kenya -->
+        <div class="p-4 rounded-lg border border-gray-200 bg-gray-50/50 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-extrabold px-2 py-0.5 rounded bg-sky-100 text-sky-800">PET BOTTLES</span>
+            <span class="text-xs font-bold text-gray-500">Batch #PET-401</span>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-gray-900">PETCO Kenya</h3>
+            <p class="text-[11px] text-gray-500">Off-taker: Clear PET Flakes</p>
+          </div>
+          <div class="space-y-1">
+            <div class="flex justify-between text-xs font-bold">
+              <span>Bale Mass: 2,500 kg</span>
+              <span class="text-emerald-700">100% Ready</span>
+            </div>
+            <div class="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div class="h-full bg-emerald-700 rounded-full" style="width: 100%;"></div>
+            </div>
+          </div>
+          <button onclick="showToast('PETCO transport manifest generated')" class="w-full py-1.5 fluent-btn-primary text-xs">Manifest Ready</button>
+        </div>
+
+        <!-- Off-taker Card 3: Bamburi Cement -->
+        <div class="p-4 rounded-lg border border-gray-200 bg-gray-50/50 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-extrabold px-2 py-0.5 rounded bg-orange-100 text-orange-800">NON-RECYCLABLE</span>
+            <span class="text-xs font-bold text-gray-500">Batch #BAM-109</span>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-gray-900">Bamburi Cement</h3>
+            <p class="text-[11px] text-gray-500">Co-Processing Kiln Fuel</p>
+          </div>
+          <div class="space-y-1">
+            <div class="flex justify-between text-xs font-bold">
+              <span>Bale Mass: 620 kg</span>
+              <span class="text-amber-700">45% Full</span>
+            </div>
+            <div class="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div class="h-full bg-amber-500 rounded-full" style="width: 45%;"></div>
+            </div>
+          </div>
+          <button onclick="showToast('Collecting additional non-recyclable fractions')" class="w-full py-1.5 fluent-btn-secondary text-xs">Accumulating</button>
+        </div>
+
+        <!-- Off-taker Card 4: Frigoken / Bio-Feed -->
+        <div class="p-4 rounded-lg border border-gray-200 bg-gray-50/50 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-extrabold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">ORGANIC WASTE</span>
+            <span class="text-xs font-bold text-gray-500">Batch #FRG-551</span>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-gray-900">Frigoken / BSF Farm</h3>
+            <p class="text-[11px] text-gray-500">Black Soldier Fly Bioconversion</p>
+          </div>
+          <div class="space-y-1">
+            <div class="flex justify-between text-xs font-bold">
+              <span>Bale Mass: 1,800 kg</span>
+              <span class="text-emerald-700">90% Ready</span>
+            </div>
+            <div class="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div class="h-full bg-emerald-600 rounded-full" style="width: 90%;"></div>
+            </div>
+          </div>
+          <button onclick="showToast('Organic batch scheduled for BSF larvae farm')" class="w-full py-1.5 fluent-btn-secondary text-xs">Dispatch to Farm</button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- M-Pesa Dispatches & Transactions Log -->
+    <section id="payouts-log" class="fluent-card p-5 bg-white">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-gray-200">
+        <div>
+          <h2 class="text-base font-bold text-gray-900 flex items-center gap-2">
+            <i class="fa-solid fa-mobile-screen-button text-emerald-700"></i> Field M-Pesa Payout Logs
+          </h2>
+          <p class="text-xs text-gray-500">Auditable log of cash disbursements sent to waste generators</p>
+        </div>
+        <button onclick="exportAuditLog()" class="fluent-btn-secondary px-3 py-1.5 text-xs flex items-center gap-1.5 self-start sm:self-auto">
+          <i class="fa-solid fa-file-csv"></i> Export Audit Log
+        </button>
+      </div>
+
+      <div class="overflow-x-auto mt-3">
+        <table class="w-full text-left text-xs border-collapse">
+          <thead>
+            <tr class="border-b border-gray-200 text-gray-500 uppercase font-bold text-[10px] tracking-wider">
+              <th class="py-2.5 px-3">Receipt / Ref</th>
+              <th class="py-2.5 px-3">Recipient Name</th>
+              <th class="py-2.5 px-3">Phone Number</th>
+              <th class="py-2.5 px-3">Weight (kg)</th>
+              <th class="py-2.5 px-3">Amount (KSh)</th>
+              <th class="py-2.5 px-3">M-Pesa Ref</th>
+              <th class="py-2.5 px-3">Status</th>
+            </tr>
+          </thead>
+          <tbody id="payoutsTableBody" class="divide-y divide-gray-100 font-medium">
+            <!-- Row 1 -->
+            <tr class="hover:bg-gray-50">
+              <td class="py-3 px-3 font-bold text-gray-900">CLK-2040</td>
+              <td class="py-3 px-3">Mercy Wanjiku</td>
+              <td class="py-3 px-3 font-mono text-gray-600">+254 722 *** 109</td>
+              <td class="py-3 px-3">28.5 kg</td>
+              <td class="py-3 px-3 font-bold text-emerald-800">798.00 KSh</td>
+              <td class="py-3 px-3 font-mono text-gray-500">QK84JD92L1</td>
+              <td class="py-3 px-3">
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">SUCCESS</span>
+              </td>
+            </tr>
+            <!-- Row 2 -->
+            <tr class="hover:bg-gray-50">
+              <td class="py-3 px-3 font-bold text-gray-900">CLK-2038</td>
+              <td class="py-3 px-3">David Omondi</td>
+              <td class="py-3 px-3 font-mono text-gray-600">+254 701 *** 882</td>
+              <td class="py-3 px-3">42.0 kg</td>
+              <td class="py-3 px-3 font-bold text-emerald-800">1,176.00 KSh</td>
+              <td class="py-3 px-3 font-mono text-gray-500">QK84JD77P4</td>
+              <td class="py-3 px-3">
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">SUCCESS</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Weighing & Signature Terminal Modal -->
+  <div id="weighModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 modal-backdrop">
+    <div class="fluent-card w-full max-w-lg p-6 bg-white relative shadow-2xl space-y-4">
+      
+      <button onclick="closeModal('weighModal')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+
+      <div class="flex items-center gap-3 border-b border-gray-100 pb-3">
+        <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-lg font-bold">
+          <i class="fa-solid fa-scale-balanced"></i>
+        </div>
+        <div>
+          <h3 class="text-base font-bold text-gray-900">Field Weighing Verification</h3>
+          <p class="text-xs text-gray-500" id="modalCustomerTitle">Customer: Jane Doe (Kilimani)</p>
+        </div>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div class="p-3 bg-gray-50 rounded border border-gray-200">
+          <div class="flex justify-between font-bold text-gray-800 mb-1">
+            <span>Customer M-Pesa Number:</span>
+            <span id="modalCustomerPhone" class="text-emerald-800">+254 712 345 678</span>
+          </div>
+          <div class="flex justify-between text-gray-600">
+            <span>Waste Categories:</span>
+            <span>PET Plastics &amp; Organic</span>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-gray-700 uppercase mb-1">Enter Final Measured Net Mass (kg)</label>
+          <input type="number" id="modalScaleMass" value="15.0" oninput="updateModalPayout()" class="w-full p-2.5 fluent-input text-base font-bold text-gray-900">
+        </div>
+
+        <div class="p-3 rounded bg-emerald-50 border border-emerald-200 flex items-center justify-between">
+          <span class="font-bold text-emerald-900">Disbursement Amount:</span>
+          <span class="text-xl font-extrabold text-emerald-800" id="modalCalculatedPayout">420.00 KSh</span>
+        </div>
+
+        <div>
+          <label class="block font-bold text-gray-700 uppercase mb-1">Generator OTP / Digital Signature Confirmation</label>
+          <input type="text" placeholder="Enter 4-digit customer PIN (e.g. 8821)" class="w-full p-2 fluent-input text-xs font-mono">
+        </div>
+      </div>
+
+      <div class="flex gap-2 pt-2">
+        <button onclick="closeModal('weighModal')" class="fluent-btn-secondary flex-1 py-2 text-xs">Cancel</button>
+        <button onclick="confirmModalDisbursement()" class="fluent-btn-primary flex-1 py-2 text-xs">Authorize M-Pesa Payment</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="collectorToast" class="fixed bottom-5 right-5 z-50 hidden p-4 rounded-lg bg-gray-900 text-white text-xs font-semibold shadow-2xl flex items-center gap-3">
+    <i class="fa-solid fa-circle-info text-emerald-400 text-base"></i>
+    <span id="collectorToastMsg">Action completed.</span>
+  </div>
+
+  <script>
+    // Dynamic Queue Data
+    let queueItems = [
+      { id: 'CLK-2041', name: 'Jane Doe', location: 'Kilimani Estate, Block C', category: 'Plastics (PET)', estWeight: '15 kg', status: 'En Route', time: '10:30 AM', phone: '+254 712 345 678' },
+      { id: 'CLK-2042', name: 'Westlands Retail Hub', location: 'Commercial Plaza, Westlands', category: 'Paper & E-Waste', estWeight: '120 kg', status: 'Pending', time: '11:15 AM', phone: '+254 720 998 112' },
+      { id: 'CLK-2043', name: 'Java House Kenya', location: 'Kilmarnock Rd, Nairobi', category: 'Organic Coffee Grounds', estWeight: '45 kg', status: 'Pending', time: '01:00 PM', phone: '+254 733 112 445' },
+      { id: 'CLK-2044', name: 'Samuel Kiptoo', location: 'Kasarani Estate', category: 'Glass Bottles', estWeight: '30 kg', status: 'Pending', time: '02:30 PM', phone: '+254 700 445 119' }
+    ];
+
+    let activeRole = 'driver';
+
+    // Role Switcher
+    function switchMode(role) {
+      activeRole = role;
+      const btnDriver = document.getElementById('btnRoleDriver');
+      const btnHub = document.getElementById('btnRoleHub');
+      const roleTag = document.getElementById('roleTag');
+      const headerTitle = document.getElementById('headerTitle');
+
+      if (role === 'driver') {
+        btnDriver.className = "flex-1 py-1.5 rounded-md bg-white text-emerald-800 shadow-sm flex items-center justify-center gap-1.5 transition-all font-bold";
+        btnHub.className = "flex-1 py-1.5 rounded-md text-gray-600 hover:text-gray-900 flex items-center justify-center gap-1.5 transition-all";
+        roleTag.innerText = "FIELD DRIVER MODE";
+        headerTitle.innerText = "Field Collection & Route Terminal";
+        document.getElementById('collectorName').innerText = "Kevin Mutua";
+        document.getElementById('collectorVehicle').innerText = "Nyeri Youth Sacco • KCG 482L";
+        showToast("Switched to Field Driver & Collection Mode");
+      } else {
+        btnHub.className = "flex-1 py-1.5 rounded-md bg-white text-emerald-800 shadow-sm flex items-center justify-center gap-1.5 transition-all font-bold";
+        btnDriver.className = "flex-1 py-1.5 rounded-md text-gray-600 hover:text-gray-900 flex items-center justify-center gap-1.5 transition-all";
+        roleTag.innerText = "HUB MANAGER MODE";
+        headerTitle.innerText = "Material Recovery & Off-taker Sorting Hub";
+        document.getElementById('collectorName').innerText = "Grace Akinyi";
+        document.getElementById('collectorVehicle').innerText = "Nairobi MRF Hub Manager";
+        showToast("Switched to Hub Sorting & Bailing Operations");
+      }
+    }
+
+    // Navigation highlight
+    function navHighlight(element) {
+      document.querySelectorAll('.nav-item').forEach(el => {
+        el.className = "nav-item flex items-center gap-3 px-3 py-2.5 rounded-md text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors";
+      });
+      element.className = "nav-item flex items-center gap-3 px-3 py-2.5 rounded-md text-emerald-800 bg-emerald-50/80 font-bold border-l-4 border-emerald-700";
+    }
+
+    // Render Queue Items
+    function renderQueue(filter = 'all') {
+      const container = document.getElementById('queueListContainer');
+      container.innerHTML = '';
+
+      const filtered = queueItems.filter(item => {
+        if (filter === 'pending') return item.status === 'Pending';
+        if (filter === 'enroute') return item.status === 'En Route';
+        return true;
+      });
+
+      filtered.forEach(item => {
+        const div = document.createElement('div');
+        const isEnRoute = item.status === 'En Route';
+
+        div.className = `p-3.5 rounded-lg border transition-all ${isEnRoute ? 'border-emerald-500 bg-emerald-50/40 shadow-sm' : 'border-gray-200 bg-white hover:border-gray-300'}`;
+
+        div.innerHTML = `
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-xs text-gray-900">${item.id} • ${item.name}</span>
+            <span class="px-2 py-0.5 rounded text-[9px] font-bold ${isEnRoute ? 'bg-emerald-700 text-white' : 'bg-amber-100 text-amber-800'}">${item.status}</span>
+          </div>
+          <div class="text-xs text-gray-600 mt-1 flex items-center gap-1">
+            <i class="fa-solid fa-location-dot text-emerald-700 text-[10px]"></i> ${item.location}
+          </div>
+          <div class="flex items-center justify-between text-[11px] text-gray-500 mt-2 pt-2 border-t border-gray-100">
+            <span>Cat: <strong class="text-gray-800">${item.category}</strong></span>
+            <span>Est: <strong class="text-emerald-800">${item.estWeight}</strong></span>
+          </div>
+          <div class="flex gap-2 mt-2">
+            <button onclick="openWeighScaleModal('${item.id}')" class="flex-1 py-1.5 fluent-btn-primary text-[11px]">
+              <i class="fa-solid fa-scale-balanced mr-1"></i> Weigh &amp; Pay
+            </button>
+            <button onclick="setTaskActive('${item.id}')" class="py-1.5 px-3 fluent-btn-secondary text-[11px]">
+              GPS Route
+            </button>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+
+      document.getElementById('queueBadge').innerText = queueItems.length;
+    }
+
+    // Filter Queue Tabs
+    function filterQueue(tab) {
+      document.getElementById('qTabAll').className = "px-2 py-1 rounded text-gray-600";
+      document.getElementById('qTabPending').className = "px-2 py-1 rounded text-gray-600";
+      document.getElementById('qTabEnroute').className = "px-2 py-1 rounded text-gray-600";
+
+      if (tab === 'all') document.getElementById('qTabAll').className = "px-2 py-1 rounded bg-white text-gray-900 shadow-sm font-bold";
+      if (tab === 'pending') document.getElementById('qTabPending').className = "px-2 py-1 rounded bg-white text-gray-900 shadow-sm font-bold";
+      if (tab === 'enroute') document.getElementById('qTabEnroute').className = "px-2 py-1 rounded bg-white text-gray-900 shadow-sm font-bold";
+
+      renderQueue(tab);
+    }
+
+    // Weigh Calculator Live Update
+    function recalculateTerminal() {
+      const pet = (parseFloat(document.getElementById('scalePET').value) || 0) * 28;
+      const hdpe = (parseFloat(document.getElementById('scaleHDPE').value) || 0) * 32;
+      const org = (parseFloat(document.getElementById('scaleORG').value) || 0) * 12;
+      const gls = (parseFloat(document.getElementById('scaleGLS').value) || 0) * 18;
+
+      const totalKg = (parseFloat(document.getElementById('scalePET').value) || 0) + 
+                       (parseFloat(document.getElementById('scaleHDPE').value) || 0) + 
+                       (parseFloat(document.getElementById('scaleORG').value) || 0) + 
+                       (parseFloat(document.getElementById('scaleGLS').value) || 0);
+
+      const subtotal = pet + hdpe + org + gls;
+      const bonus = subtotal * 0.10;
+      const net = subtotal + bonus;
+
+      document.getElementById('scaleTotalKg').innerText = `${totalKg.toFixed(1)} kg`;
+      document.getElementById('scaleSubtotal').innerText = `${subtotal.toFixed(2)} KSh`;
+      document.getElementById('scaleBonus').innerText = `+${bonus.toFixed(2)} KSh`;
+      document.getElementById('scaleNetPayout').innerText = `${net.toFixed(2)} KSh`;
+    }
+
+    // Dispatch M-Pesa Payout Simulator
+    function dispatchMpesaPayout() {
+      const phone = document.getElementById('scaleMpesaPhone').value;
+      const net = document.getElementById('scaleNetPayout').innerText;
+      const kg = document.getElementById('scaleTotalKg').innerText;
+
+      // Update KPIs
+      const currentVol = parseFloat(document.getElementById('kpiVolume').innerText);
+      document.getElementById('kpiVolume').innerText = (currentVol + parseFloat(kg)).toFixed(1);
+
+      showToast(`SUCCESS: ${net} dispatched via M-Pesa B2C to ${phone}`);
+
+      // Add to audit table
+      const tbody = document.getElementById('payoutsTableBody');
+      const tr = document.createElement('tr');
+      tr.className = 'hover:bg-gray-50';
+      const ref = `QK84JD${Math.floor(100 + Math.random()*900)}`;
+
+      tr.innerHTML = `
+        <td class="py-3 px-3 font-bold text-gray-900">CLK-${Math.floor(2045 + Math.random()*50)}</td>
+        <td class="py-3 px-3">On-Site Scale Generator</td>
+        <td class="py-3 px-3 font-mono text-gray-600">${phone}</td>
+        <td class="py-3 px-3">${kg}</td>
+        <td class="py-3 px-3 font-bold text-emerald-800">${net}</td>
+        <td class="py-3 px-3 font-mono text-gray-500">${ref}</td>
+        <td class="py-3 px-3">
+          <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">SUCCESS</span>
+        </td>
+      `;
+      tbody.prepend(tr);
+    }
+
+    // Modal Operations
+    function openWeighScaleModal(id) {
+      if (id) {
+        const item = queueItems.find(q => q.id === id);
+        if (item) {
+          document.getElementById('modalCustomerTitle').innerText = `Customer: ${item.name} (${item.location})`;
+          document.getElementById('modalCustomerPhone').innerText = item.phone;
+        }
+      }
+      document.getElementById('weighModal').classList.remove('hidden');
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.add('hidden');
+    }
+
+    function updateModalPayout() {
+      const mass = parseFloat(document.getElementById('modalScaleMass').value) || 0;
+      const payout = mass * 28.0;
+      document.getElementById('modalCalculatedPayout').innerText = `${payout.toFixed(2)} KSh`;
+    }
+
+    function confirmModalDisbursement() {
+      closeModal('weighModal');
+      showToast("M-Pesa payment authorized & digital receipt sent!");
+    }
+
+    function setTaskActive(id) {
+      queueItems.forEach(q => q.status = (q.id === id ? 'En Route' : 'Pending'));
+      renderQueue();
+      showToast(`GPS Route set to ${id}`);
+    }
+
+    function selectStopFromMap(id) {
+      setTaskActive(id);
+    }
+
+    function triggerSimulatedGPS() {
+      showToast("GPS location calibrated to Nairobi Central (Lat: -1.286389, Lon: 36.817223)");
+    }
+
+    function openCreateBatchModal() {
+      showToast("Opening Off-taker Batch Assembly Terminal...");
+    }
+
+    function exportAuditLog() {
+      showToast("Exporting M-Pesa CSV audit log...");
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('collectorToast');
+      document.getElementById('collectorToastMsg').innerText = msg;
+      toast.classList.remove('hidden');
+      setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 3500);
+    }
+
+    // Init Page
+    window.onload = function() {
+      renderQueue();
+      recalculateTerminal();
+    };
+  </script>
+</body>
+</html>

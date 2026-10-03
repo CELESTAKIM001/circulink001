@@ -1,0 +1,1479 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-950 text-slate-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CIRCULINK - Master Admin & Investor Command Center</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            fluent: {
+              bg: '#0f172a',
+              card: 'rgba(30, 41, 59, 0.7)',
+              glass: 'rgba(255, 255, 255, 0.05)',
+              border: 'rgba(255, 255, 255, 0.12)',
+              primary: '#0078d4',
+              primaryHover: '#106ebe',
+              teal: '#00b7c3',
+              green: '#107c41',
+              warning: '#d13438',
+              accent: '#2b88d8'
+            }
+          },
+          backdropBlur: {
+            'fluent': '20px'
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Microsoft Fluent Design Glassmorphism & Custom Scrollbars */
+    .fluent-glass {
+      background: rgba(30, 41, 59, 0.65);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    }
+    .fluent-glass-hover {
+      transition: all 0.25s cubic-bezier(0.1, 0.9, 0.2, 1);
+    }
+    .fluent-glass-hover:hover {
+      background: rgba(45, 62, 80, 0.75);
+      border-color: rgba(0, 120, 212, 0.4);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 36px 0 rgba(0, 0, 0, 0.45);
+    }
+    .fluent-input {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      transition: all 0.2s ease;
+    }
+    .fluent-input:focus {
+      border-color: #0078d4;
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.3);
+    }
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.5);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(0, 120, 212, 0.6);
+    }
+    /* Printable Documents CSS */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #print-modal, #print-modal * {
+        visibility: visible;
+      }
+      #print-modal {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        background: #ffffff !important;
+        color: #000000 !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body class="h-full font-sans antialiased bg-slate-950 text-slate-100 flex flex-col overflow-hidden">
+
+  <!-- Top Navigation / Fluent Command Bar -->
+  <header class="h-16 fluent-glass border-b border-white/10 px-6 flex items-center justify-between z-30 shrink-0">
+    <div class="flex items-center gap-4">
+      <div class="flex items-center gap-2">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 via-teal-500 to-blue-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+          <i data-lucide="recycle" class="w-6 h-6 text-white"></i>
+        </div>
+        <div>
+          <h1 class="font-bold text-lg tracking-wide bg-gradient-to-r from-emerald-400 via-teal-300 to-blue-400 bg-clip-text text-transparent">
+            CIRCULINK
+          </h1>
+          <p class="text-[10px] text-slate-400 tracking-wider uppercase font-semibold">Tuna Taka Taka Enterprise</p>
+        </div>
+      </div>
+
+      <div class="h-6 w-[1px] bg-white/15 mx-2"></div>
+
+      <!-- Mode Switcher (Admin vs Investor) -->
+      <div class="flex bg-slate-900/80 p-1 rounded-lg border border-white/10">
+        <button id="btn-mode-admin" onclick="switchViewMode('admin')" class="px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-200 flex items-center gap-1.5 bg-fluent-primary text-white shadow-md">
+          <i data-lucide="shield-alert" class="w-3.5 h-3.5"></i>
+          <span>Master Admin</span>
+        </button>
+        <button id="btn-mode-investor" onclick="switchViewMode('investor')" class="px-3 py-1.5 rounded-md text-xs font-medium text-slate-400 hover:text-white transition-all duration-200 flex items-center gap-1.5">
+          <i data-lucide="trending-up" class="w-3.5 h-3.5"></i>
+          <span>Investor Relations</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Search & Quick Utilities -->
+    <div class="flex items-center gap-3">
+      <!-- Search Box -->
+      <div class="relative w-64 hidden md:block">
+        <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+        <input type="text" id="global-search" onkeyup="handleGlobalSearch()" placeholder="Search collectors, payouts, sites..." 
+          class="w-full pl-9 pr-4 py-1.5 rounded-lg fluent-input text-xs text-white placeholder-slate-400">
+      </div>
+
+      <!-- Quick Actions -->
+      <button onclick="openNotificationCenter()" class="p-2 rounded-lg hover:bg-white/10 text-slate-300 relative transition-colors">
+        <i data-lucide="bell" class="w-4 h-4"></i>
+        <span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+      </button>
+
+      <button onclick="openCommunicationModal()" class="px-3 py-1.5 rounded-lg bg-emerald-600/80 hover:bg-emerald-600 text-xs font-medium flex items-center gap-1.5 transition-all text-white shadow-sm">
+        <i data-lucide="send" class="w-3.5 h-3.5"></i>
+        <span class="hidden sm:inline">Send Email/SMS</span>
+      </button>
+
+      <div class="h-6 w-[1px] bg-white/15"></div>
+
+      <!-- User Profile -->
+      <div class="flex items-center gap-2.5">
+        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" alt="Avatar" class="w-8 h-8 rounded-full ring-2 ring-emerald-500/50 object-cover">
+        <div class="hidden lg:block text-left">
+          <p class="text-xs font-semibold text-slate-200">Sarah Jenkins</p>
+          <p class="text-[10px] text-emerald-400 font-mono">Managing Director</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Wrapper -->
+  <div class="flex flex-1 overflow-hidden">
+
+    <!-- Sidebar Navigation -->
+    <aside class="w-64 fluent-glass border-r border-white/10 flex flex-col justify-between p-3 shrink-0 hidden md:flex">
+      <div class="space-y-1">
+        <div class="px-3 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Navigation</div>
+        
+        <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium bg-fluent-primary text-white shadow-sm">
+          <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+          <span>Command Overview</span>
+        </button>
+
+        <button onclick="switchTab('tenants')" id="nav-tenants" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium text-slate-300 hover:bg-white/10 transition-colors">
+          <i data-lucide="globe" class="w-4 h-4"></i>
+          <span>Collector Sites (Tenants)</span>
+          <span id="tenant-count-badge" class="ml-auto bg-slate-800 text-slate-300 text-[10px] px-2 py-0.5 rounded-full border border-white/10">4 Active</span>
+        </button>
+
+        <button onclick="switchTab('users')" id="nav-users" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium text-slate-300 hover:bg-white/10 transition-colors">
+          <i data-lucide="users" class="w-4 h-4"></i>
+          <span>Collectors & Staff</span>
+        </button>
+
+        <button onclick="switchTab('pickups')" id="nav-pickups" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium text-slate-300 hover:bg-white/10 transition-colors">
+          <i data-lucide="truck" class="w-4 h-4"></i>
+          <span>Pickups & Routing</span>
+        </button>
+
+        <button onclick="switchTab('inventory')" id="nav-inventory" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium text-slate-300 hover:bg-white/10 transition-colors">
+          <i data-lucide="boxes" class="w-4 h-4"></i>
+          <span>Hub Inventory & Stock</span>
+        </button>
+
+        <button onclick="switchTab('payouts')" id="nav-payouts" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium text-slate-300 hover:bg-white/10 transition-colors">
+          <i data-lucide="wallet" class="w-4 h-4"></i>
+          <span>Payments & M-Pesa B2C</span>
+        </button>
+
+        <div class="px-3 pt-4 pb-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Analytics & Investors</div>
+
+        <button onclick="switchTab('financials')" id="nav-financials" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium text-slate-300 hover:bg-white/10 transition-colors">
+          <i data-lucide="line-chart" class="w-4 h-4"></i>
+          <span>ROI & Yield Projections</span>
+        </button>
+
+        <button onclick="switchTab('audit')" id="nav-audit" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium text-slate-300 hover:bg-white/10 transition-colors">
+          <i data-lucide="clipboard-list" class="w-4 h-4"></i>
+          <span>Audit Logs & Security</span>
+        </button>
+      </div>
+
+      <!-- Quick Platform Status Card -->
+      <div class="p-3 rounded-xl bg-slate-900/90 border border-white/10 text-xs">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-slate-400 font-medium">System Health</span>
+          <span class="flex items-center gap-1 text-emerald-400 font-semibold text-[10px]">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span> 99.98%
+          </span>
+        </div>
+        <div class="w-full bg-slate-800 rounded-full h-1.5 mb-2 overflow-hidden">
+          <div class="bg-gradient-to-r from-emerald-500 to-blue-500 h-1.5 rounded-full w-[94%]"></div>
+        </div>
+        <p class="text-[10px] text-slate-400">M-Pesa API Gateway: <span class="text-emerald-300 font-mono">Connected</span></p>
+      </div>
+    </aside>
+
+    <!-- Content Workspace -->
+    <main class="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 bg-slate-950/80">
+
+      <!-- TAB 1: COMMAND OVERVIEW -->
+      <section id="tab-dashboard" class="tab-content space-y-6">
+        
+        <!-- Welcome / Status Banner -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 rounded-2xl fluent-glass border border-emerald-500/20 bg-gradient-to-r from-slate-900 via-slate-900 to-emerald-950/30">
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-semibold tracking-wide uppercase border border-emerald-500/30">Live Production Master</span>
+              <span class="text-slate-400 text-xs">East Africa Waste-to-Value Infrastructure</span>
+            </div>
+            <h2 class="text-2xl font-bold text-white tracking-tight">System Performance & Yield Monitor</h2>
+            <p class="text-slate-400 text-xs mt-1">Real-time throughput metrics across 4 collector hubs, M-Pesa B2C payouts, and municipal waste recycling streams.</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <button onclick="generateMonthlyAuditReport()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 border border-white/10 flex items-center gap-2 transition-all shadow-sm">
+              <i data-lucide="printer" class="w-4 h-4 text-teal-400"></i>
+              <span>Print System Audit Report</span>
+            </button>
+            <button onclick="openNewTenantModal()" class="px-4 py-2 rounded-xl bg-fluent-primary hover:bg-fluent-primaryHover text-xs font-semibold text-white flex items-center gap-2 transition-all shadow-md">
+              <i data-lucide="plus" class="w-4 h-4"></i>
+              <span>Provision New Site</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Top KPI Cards Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- Metric 1 -->
+          <div class="p-5 rounded-xl fluent-glass fluent-glass-hover">
+            <div class="flex items-center justify-between">
+              <span class="text-slate-400 text-xs font-medium">Total Monthly Revenue</span>
+              <div class="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                <i data-lucide="dollar-sign" class="w-4 h-4"></i>
+              </div>
+            </div>
+            <div class="mt-3">
+              <span class="text-2xl font-bold text-white tracking-tight">KES 14,850,200</span>
+              <div class="flex items-center gap-1.5 mt-1 text-[11px] text-emerald-400">
+                <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
+                <span class="font-semibold">+18.4%</span>
+                <span class="text-slate-400">vs last month</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Metric 2 -->
+          <div class="p-5 rounded-xl fluent-glass fluent-glass-hover">
+            <div class="flex items-center justify-between">
+              <span class="text-slate-400 text-xs font-medium">Processed Tonnage (Oct)</span>
+              <div class="p-2 rounded-lg bg-teal-500/10 text-teal-400 border border-teal-500/20">
+                <i data-lucide="scale" class="w-4 h-4"></i>
+              </div>
+            </div>
+            <div class="mt-3">
+              <span class="text-2xl font-bold text-white tracking-tight">1,482.5 Tons</span>
+              <div class="flex items-center gap-1.5 mt-1 text-[11px] text-teal-400">
+                <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
+                <span class="font-semibold">+12.1%</span>
+                <span class="text-slate-400">PET/HDPE/Glass</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Metric 3 -->
+          <div class="p-5 rounded-xl fluent-glass fluent-glass-hover">
+            <div class="flex items-center justify-between">
+              <span class="text-slate-400 text-xs font-medium">Active Collectors Paid</span>
+              <div class="p-2 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                <i data-lucide="users" class="w-4 h-4"></i>
+              </div>
+            </div>
+            <div class="mt-3">
+              <span class="text-2xl font-bold text-white tracking-tight">842 Collectors</span>
+              <div class="flex items-center gap-1.5 mt-1 text-[11px] text-blue-400">
+                <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>
+                <span class="font-semibold">M-Pesa B2C active</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Metric 4 -->
+          <div class="p-5 rounded-xl fluent-glass fluent-glass-hover">
+            <div class="flex items-center justify-between">
+              <span class="text-slate-400 text-xs font-medium">Investor ROI Yield (YTD)</span>
+              <div class="p-2 rounded-lg bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                <i data-lucide="percent" class="w-4 h-4"></i>
+              </div>
+            </div>
+            <div class="mt-3">
+              <span class="text-2xl font-bold text-white tracking-tight">22.6% IRR</span>
+              <div class="flex items-center gap-1.5 mt-1 text-[11px] text-purple-400">
+                <i data-lucide="trending-up" class="w-3.5 h-3.5"></i>
+                <span class="font-semibold">Series A target: 25%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Main Tonnage & Revenue Chart -->
+          <div class="lg:col-span-2 p-5 rounded-xl fluent-glass">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h3 class="text-sm font-bold text-white">Monthly Processing & Revenue Stream</h3>
+                <p class="text-[11px] text-slate-400">Recycled material volume vs gross payout value</p>
+              </div>
+              <select id="chart-period-select" class="bg-slate-900 border border-white/15 rounded-lg px-2.5 py-1 text-xs text-slate-300">
+                <option value="6">Last 6 Months</option>
+                <option value="12">12 Months Projection</option>
+              </select>
+            </div>
+            <div class="h-64">
+              <canvas id="overviewChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Hub Material Mix Doughnut -->
+          <div class="p-5 rounded-xl fluent-glass flex flex-col justify-between">
+            <div>
+              <h3 class="text-sm font-bold text-white mb-1">Waste Stream Composition</h3>
+              <p class="text-[11px] text-slate-400 mb-4">Material density per ton collected</p>
+              <div class="h-48 relative">
+                <canvas id="materialDoughnutChart"></canvas>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-2 pt-3 border-t border-white/10 text-[11px]">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                <span class="text-slate-300">PET Plastics (42%)</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+                <span class="text-slate-300">HDPE / Rigid (28%)</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-teal-400"></span>
+                <span class="text-slate-300">Cardboard (18%)</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+                <span class="text-slate-300">E-Waste / Metal (12%)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Active Sites & Quick System Actions Table -->
+        <div class="p-5 rounded-xl fluent-glass space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-sm font-bold text-white">Collector Website Tenants (Micro-Sites)</h3>
+              <p class="text-[11px] text-slate-400">Manage localized collection sites, domain status, and platform controls</p>
+            </div>
+            <button onclick="switchTab('tenants')" class="text-xs text-fluent-primary hover:underline font-medium">View All Sites &rarr;</button>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-300">
+              <thead class="bg-slate-900/80 text-slate-400 text-[11px] uppercase tracking-wider border-b border-white/10">
+                <tr>
+                  <th class="py-3 px-4">Site Name & Region</th>
+                  <th class="py-3 px-4">Domain</th>
+                  <th class="py-3 px-4">Daily Tonnage</th>
+                  <th class="py-3 px-4">Status</th>
+                  <th class="py-3 px-4 text-right">Quick Control Actions</th>
+                </tr>
+              </thead>
+              <tbody id="dashboard-tenants-tbody" class="divide-y divide-white/5">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- TAB 2: TENANT SITES CRUD -->
+      <section id="tab-tenants" class="tab-content hidden space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-xl font-bold text-white">Collector Platforms & Tenant Websites</h2>
+            <p class="text-xs text-slate-400">Activate, suspend, configure payout rates, or launch regional hub sites.</p>
+          </div>
+          <button onclick="openNewTenantModal()" class="px-4 py-2 rounded-xl bg-fluent-primary hover:bg-fluent-primaryHover text-xs font-semibold text-white flex items-center gap-2 shadow-md">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span>Provision Collector Portal</span>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="tenant-cards-container">
+          <!-- Dynamically populated tenant cards -->
+        </div>
+      </section>
+
+      <!-- TAB 3: USERS & COLLECTORS CRUD -->
+      <section id="tab-users" class="tab-content hidden space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-xl font-bold text-white">Collector Directory & Staff Directory</h2>
+            <p class="text-xs text-slate-400">Manage collector profiles, M-Pesa account verification, and hub supervisor credentials.</p>
+          </div>
+          <button onclick="openNewUserModal()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-xs font-semibold text-white flex items-center gap-2 shadow-md">
+            <i data-lucide="user-plus" class="w-4 h-4"></i>
+            <span>Register Collector / User</span>
+          </button>
+        </div>
+
+        <!-- Filter bar -->
+        <div class="flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl fluent-glass">
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-slate-400">Filter Role:</span>
+            <select id="user-filter-role" onchange="renderUsersTable()" class="bg-slate-900 border border-white/15 rounded-lg px-3 py-1 text-xs text-slate-200">
+              <option value="all">All Roles</option>
+              <option value="Collector">Waste Collector</option>
+              <option value="Supervisor">Hub Supervisor</option>
+              <option value="Investor">Investor</option>
+            </select>
+          </div>
+          <span class="text-xs text-slate-400" id="users-count-text">Showing 0 users</span>
+        </div>
+
+        <div class="p-5 rounded-xl fluent-glass overflow-x-auto">
+          <table class="w-full text-left text-xs text-slate-300">
+            <thead class="bg-slate-900/80 text-slate-400 text-[11px] uppercase tracking-wider border-b border-white/10">
+              <tr>
+                <th class="py-3 px-4">User Name</th>
+                <th class="py-3 px-4">Phone (M-Pesa)</th>
+                <th class="py-3 px-4">Assigned Hub</th>
+                <th class="py-3 px-4">Role</th>
+                <th class="py-3 px-4">Total Tonnage</th>
+                <th class="py-3 px-4">KYC Status</th>
+                <th class="py-3 px-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="users-tbody" class="divide-y divide-white/5">
+              <!-- Rendered via JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- TAB 4: PICKUPS LOGISTICS -->
+      <section id="tab-pickups" class="tab-content hidden space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-xl font-bold text-white">Scheduled Pickups & Routing Dispatch</h2>
+            <p class="text-xs text-slate-400">Monitor vehicle dispatch, weight validation, and route optimization.</p>
+          </div>
+          <button onclick="openNewPickupModal()" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-xs font-semibold text-white flex items-center gap-2 shadow-md">
+            <i data-lucide="truck" class="w-4 h-4"></i>
+            <span>Schedule New Dispatch</span>
+          </button>
+        </div>
+
+        <div class="p-5 rounded-xl fluent-glass overflow-x-auto">
+          <table class="w-full text-left text-xs text-slate-300">
+            <thead class="bg-slate-900/80 text-slate-400 text-[11px] uppercase tracking-wider border-b border-white/10">
+              <tr>
+                <th class="py-3 px-4">Dispatch ID</th>
+                <th class="py-3 px-4">Location / Zone</th>
+                <th class="py-3 px-4">Collector / Driver</th>
+                <th class="py-3 px-4">Waste Type</th>
+                <th class="py-3 px-4">Est. Weight</th>
+                <th class="py-3 px-4">Status</th>
+                <th class="py-3 px-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="pickups-tbody" class="divide-y divide-white/5">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- TAB 5: INVENTORY CRUD -->
+      <section id="tab-inventory" class="tab-content hidden space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-xl font-bold text-white">Hub Inventory & Material Bales</h2>
+            <p class="text-xs text-slate-400">Track processed PET, HDPE, Aluminum baled stock awaiting factory off-take.</p>
+          </div>
+          <button onclick="openNewStockModal()" class="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-xs font-semibold text-white flex items-center gap-2 shadow-md">
+            <i data-lucide="box" class="w-4 h-4"></i>
+            <span>Log Processed Bale Batch</span>
+          </button>
+        </div>
+
+        <div class="p-5 rounded-xl fluent-glass overflow-x-auto">
+          <table class="w-full text-left text-xs text-slate-300">
+            <thead class="bg-slate-900/80 text-slate-400 text-[11px] uppercase tracking-wider border-b border-white/10">
+              <tr>
+                <th class="py-3 px-4">Batch ID</th>
+                <th class="py-3 px-4">Hub Facility</th>
+                <th class="py-3 px-4">Material Grade</th>
+                <th class="py-3 px-4">Quantity (Bales)</th>
+                <th class="py-3 px-4">Weight (Kg)</th>
+                <th class="py-3 px-4">Market Value (KES)</th>
+                <th class="py-3 px-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="inventory-tbody" class="divide-y divide-white/5">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- TAB 6: PAYMENTS & M-PESA B2C -->
+      <section id="tab-payouts" class="tab-content hidden space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-xl font-bold text-white">Financial Ledger & M-Pesa B2C Payouts</h2>
+            <p class="text-xs text-slate-400">Instant digital wallet disbursement to waste collectors with automated receipts.</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <button onclick="triggerBulkMpesaPayout()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-xs font-semibold text-white flex items-center gap-2 shadow-md">
+              <i data-lucide="zap" class="w-4 h-4"></i>
+              <span>Execute Bulk M-Pesa B2C</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="p-5 rounded-xl fluent-glass overflow-x-auto">
+          <table class="w-full text-left text-xs text-slate-300">
+            <thead class="bg-slate-900/80 text-slate-400 text-[11px] uppercase tracking-wider border-b border-white/10">
+              <tr>
+                <th class="py-3 px-4">Transaction Code</th>
+                <th class="py-3 px-4">Beneficiary / Phone</th>
+                <th class="py-3 px-4">Material Delivered</th>
+                <th class="py-3 px-4">Amount (KES)</th>
+                <th class="py-3 px-4">Channel</th>
+                <th class="py-3 px-4">Status</th>
+                <th class="py-3 px-4 text-right">Receipt & Voucher</th>
+              </tr>
+            </thead>
+            <tbody id="payouts-tbody" class="divide-y divide-white/5">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- TAB 7: FINANCIAL MODELING & INVESTOR RELATIONS -->
+      <section id="tab-financials" class="tab-content hidden space-y-6">
+        <div class="p-6 rounded-2xl fluent-glass border border-blue-500/30 bg-gradient-to-r from-slate-900 via-blue-950/20 to-purple-950/30">
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-300 text-[10px] font-semibold tracking-wide uppercase border border-blue-500/30">Series A Capital Modeling</span>
+              <h2 class="text-2xl font-bold text-white mt-1">Interactive Investor ROI & Yield Engine</h2>
+              <p class="text-slate-400 text-xs">Simulate tonnage expansion, facility CAPEX, EBITDA margins, and IRR dividends.</p>
+            </div>
+            <div class="text-right">
+              <p class="text-xs text-slate-400">Target Valuation</p>
+              <p class="text-2xl font-bold text-emerald-400 font-mono">$12,500,000 USD</p>
+            </div>
+          </div>
+
+          <!-- Interactive Sliders -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6 p-4 bg-slate-950/60 rounded-xl border border-white/10">
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span class="text-slate-300 font-medium">Daily Processing Tonnage</span>
+                <span id="slider-tons-val" class="font-bold text-emerald-400">120 Tons/Day</span>
+              </div>
+              <input type="range" id="slider-tons" min="30" max="500" value="120" oninput="updateFinancialModel()" class="w-full accent-emerald-500 cursor-pointer">
+            </div>
+
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span class="text-slate-300 font-medium">Off-take Revenue / Ton</span>
+                <span id="slider-price-val" class="font-bold text-teal-400">KES 48,000</span>
+              </div>
+              <input type="range" id="slider-price" min="20000" max="90000" value="48000" step="1000" oninput="updateFinancialModel()" class="w-full accent-teal-500 cursor-pointer">
+            </div>
+
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span class="text-slate-300 font-medium">Collector Payout Ratio</span>
+                <span id="slider-margin-val" class="font-bold text-blue-400">45% of Gross</span>
+              </div>
+              <input type="range" id="slider-margin" min="20" max="70" value="45" oninput="updateFinancialModel()" class="w-full accent-blue-500 cursor-pointer">
+            </div>
+          </div>
+
+          <!-- Live Model Calculations -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
+            <div class="p-4 rounded-xl bg-slate-900/90 border border-white/10">
+              <p class="text-[11px] text-slate-400">Projected Annual Revenue (ARR)</p>
+              <p id="model-arr" class="text-xl font-bold text-white font-mono mt-1">KES 2,102,400,000</p>
+            </div>
+            <div class="p-4 rounded-xl bg-slate-900/90 border border-white/10">
+              <p class="text-[11px] text-slate-400">Estimated Annual EBITDA</p>
+              <p id="model-ebitda" class="text-xl font-bold text-emerald-400 font-mono mt-1">KES 630,720,000</p>
+            </div>
+            <div class="p-4 rounded-xl bg-slate-900/90 border border-white/10">
+              <p class="text-[11px] text-slate-400">Investor Annual Yield (IRR)</p>
+              <p id="model-irr" class="text-xl font-bold text-purple-400 font-mono mt-1">28.4% Return</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cap Table & Impact Metrics -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="p-5 rounded-xl fluent-glass">
+            <h3 class="text-sm font-bold text-white mb-3">Equity Ownership & Cap Table</h3>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs text-slate-300">
+                <thead class="bg-slate-900/80 text-slate-400 uppercase text-[10px]">
+                  <tr>
+                    <th class="py-2 px-3">Shareholder</th>
+                    <th class="py-2 px-3">Share Class</th>
+                    <th class="py-2 px-3">Equity %</th>
+                    <th class="py-2 px-3 text-right">Investment</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-white/5">
+                  <tr>
+                    <td class="py-2.5 px-3 font-semibold text-white">Founders & Management</td>
+                    <td class="py-2.5 px-3">Common A</td>
+                    <td class="py-2.5 px-3 text-emerald-400">52.0%</td>
+                    <td class="py-2.5 px-3 text-right font-mono">$1,200,000</td>
+                  </tr>
+                  <tr>
+                    <td class="py-2.5 px-3 font-semibold text-white">CircuVentures East Africa</td>
+                    <td class="py-2.5 px-3">Preferred Seed</td>
+                    <td class="py-2.5 px-3 text-blue-400">24.5%</td>
+                    <td class="py-2.5 px-3 text-right font-mono">$2,500,000</td>
+                  </tr>
+                  <tr>
+                    <td class="py-2.5 px-3 font-semibold text-white">Green Earth Impact Fund</td>
+                    <td class="py-2.5 px-3">Preferred Seed</td>
+                    <td class="py-2.5 px-3 text-teal-400">15.5%</td>
+                    <td class="py-2.5 px-3 text-right font-mono">$1,500,000</td>
+                  </tr>
+                  <tr>
+                    <td class="py-2.5 px-3 font-semibold text-white">Employee Option Pool</td>
+                    <td class="py-2.5 px-3">Options</td>
+                    <td class="py-2.5 px-3 text-purple-400">8.0%</td>
+                    <td class="py-2.5 px-3 text-right font-mono">-</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- ESG Environmental Impact -->
+          <div class="p-5 rounded-xl fluent-glass space-y-4">
+            <h3 class="text-sm font-bold text-white">Verified ESG & Carbon Offset Metrics</h3>
+            <div class="grid grid-cols-2 gap-4 text-xs">
+              <div class="p-3 rounded-lg bg-emerald-950/40 border border-emerald-500/20">
+                <p class="text-slate-400">CO2 Equivalent Avoided</p>
+                <p class="text-xl font-bold text-emerald-300 font-mono mt-1">4,280 Metric Tons</p>
+              </div>
+              <div class="p-3 rounded-lg bg-blue-950/40 border border-blue-500/20">
+                <p class="text-slate-400">Landfill Diversion Rate</p>
+                <p class="text-xl font-bold text-blue-300 font-mono mt-1">94.8% Total</p>
+              </div>
+              <div class="p-3 rounded-lg bg-teal-950/40 border border-teal-500/20">
+                <p class="text-slate-400">Livelihoods Supported</p>
+                <p class="text-xl font-bold text-teal-300 font-mono mt-1">1,240 Informal Workers</p>
+              </div>
+              <div class="p-3 rounded-lg bg-purple-950/40 border border-purple-500/20">
+                <p class="text-slate-400">Micro-Grants Distributed</p>
+                <p class="text-xl font-bold text-purple-300 font-mono mt-1">KES 8,450,000</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 8: AUDIT LOGS -->
+      <section id="tab-audit" class="tab-content hidden space-y-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-xl font-bold text-white">Security & Administrative Audit Logs</h2>
+            <p class="text-xs text-slate-400">Immutably tracked system activities, payment dispatches, and website toggles.</p>
+          </div>
+          <button onclick="clearAuditLogs()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-300">Clear View</button>
+        </div>
+
+        <div class="p-5 rounded-xl fluent-glass font-mono text-xs space-y-3" id="audit-logs-container">
+          <!-- Logs rendered dynamically -->
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- MODAL 1: TENANT SITE (CREATE / EDIT) -->
+  <div id="modal-tenant" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+    <div class="w-full max-w-lg fluent-glass rounded-2xl border border-white/20 p-6 space-y-4">
+      <div class="flex items-center justify-between border-b border-white/10 pb-3">
+        <h3 class="text-base font-bold text-white" id="modal-tenant-title">Provision New Collector Site</h3>
+        <button onclick="closeModal('modal-tenant')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <form id="form-tenant" onsubmit="saveTenant(event)" class="space-y-3 text-xs">
+        <input type="hidden" id="tenant-id">
+        <div>
+          <label class="block text-slate-300 mb-1">Site / Hub Name</label>
+          <input type="text" id="tenant-name" required placeholder="e.g. Kibera Eco-Collectors Site" class="w-full p-2.5 rounded-lg fluent-input text-white">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-300 mb-1">Domain Sub-path</label>
+            <input type="text" id="tenant-domain" required placeholder="kibera.circulink.co.ke" class="w-full p-2.5 rounded-lg fluent-input text-white">
+          </div>
+          <div>
+            <label class="block text-slate-300 mb-1">Region / Location</label>
+            <input type="text" id="tenant-region" required placeholder="Nairobi, Kenya" class="w-full p-2.5 rounded-lg fluent-input text-white">
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-300 mb-1">PET Price / Kg (KES)</label>
+            <input type="number" id="tenant-rate-pet" required placeholder="32" class="w-full p-2.5 rounded-lg fluent-input text-white">
+          </div>
+          <div>
+            <label class="block text-slate-300 mb-1">HDPE Price / Kg (KES)</label>
+            <input type="number" id="tenant-rate-hdpe" required placeholder="28" class="w-full p-2.5 rounded-lg fluent-input text-white">
+          </div>
+        </div>
+        <div>
+          <label class="block text-slate-300 mb-1">Site Operational Status</label>
+          <select id="tenant-status" class="w-full p-2.5 rounded-lg fluent-input text-white bg-slate-900">
+            <option value="Active">Active & Online</option>
+            <option value="Maintenance">Under Maintenance</option>
+            <option value="Suspended">Suspended / Inactive</option>
+          </select>
+        </div>
+        <div class="pt-3 flex justify-end gap-2">
+          <button type="button" onclick="closeModal('modal-tenant')" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium">Cancel</button>
+          <button type="submit" class="px-4 py-2 rounded-xl bg-fluent-primary hover:bg-fluent-primaryHover text-white font-semibold">Save Tenant Site</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 2: USER CRUD -->
+  <div id="modal-user" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+    <div class="w-full max-w-lg fluent-glass rounded-2xl border border-white/20 p-6 space-y-4">
+      <div class="flex items-center justify-between border-b border-white/10 pb-3">
+        <h3 class="text-base font-bold text-white" id="modal-user-title">Register Collector / User</h3>
+        <button onclick="closeModal('modal-user')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <form id="form-user" onsubmit="saveUser(event)" class="space-y-3 text-xs">
+        <input type="hidden" id="user-id">
+        <div>
+          <label class="block text-slate-300 mb-1">Full Legal Name</label>
+          <input type="text" id="user-name" required placeholder="John Kamau" class="w-full p-2.5 rounded-lg fluent-input text-white">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-300 mb-1">M-Pesa Phone Number</label>
+            <input type="text" id="user-phone" required placeholder="+254 712 345 678" class="w-full p-2.5 rounded-lg fluent-input text-white">
+          </div>
+          <div>
+            <label class="block text-slate-300 mb-1">Assigned Role</label>
+            <select id="user-role" class="w-full p-2.5 rounded-lg fluent-input text-white bg-slate-900">
+              <option value="Collector">Waste Collector</option>
+              <option value="Supervisor">Hub Supervisor</option>
+              <option value="Investor">Investor Relations</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block text-slate-300 mb-1">Assigned Hub Facility</label>
+          <select id="user-hub" class="w-full p-2.5 rounded-lg fluent-input text-white bg-slate-900">
+            <option value="Nairobi Central Hub">Nairobi Central Hub</option>
+            <option value="Kibera Recycling Depot">Kibera Recycling Depot</option>
+            <option value="Mombasa Coastal Recycling">Mombasa Coastal Recycling</option>
+            <option value="Nakuru Rift Hub">Nakuru Rift Hub</option>
+          </select>
+        </div>
+        <div class="pt-3 flex justify-end gap-2">
+          <button type="button" onclick="closeModal('modal-user')" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 font-medium">Cancel</button>
+          <button type="submit" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold">Save User Profile</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 3: COMMUNICATION SIMULATOR (EMAIL & SMS) -->
+  <div id="modal-comm" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+    <div class="w-full max-w-lg fluent-glass rounded-2xl border border-white/20 p-6 space-y-4">
+      <div class="flex items-center justify-between border-b border-white/10 pb-3">
+        <div class="flex items-center gap-2">
+          <i data-lucide="send" class="w-5 h-5 text-emerald-400"></i>
+          <h3 class="text-base font-bold text-white">Automated Email / SMS Dispatch Engine</h3>
+        </div>
+        <button onclick="closeModal('modal-comm')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <form onsubmit="sendCommunication(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-300 mb-1">Channel Type</label>
+          <div class="flex gap-4 text-slate-200">
+            <label class="flex items-center gap-1.5 cursor-pointer">
+              <input type="radio" name="comm-channel" value="SMS" checked class="accent-emerald-500">
+              <span>SMS via M-Pesa Gateway</span>
+            </label>
+            <label class="flex items-center gap-1.5 cursor-pointer">
+              <input type="radio" name="comm-channel" value="Email" class="accent-emerald-500">
+              <span>Transactional Email (SMTP)</span>
+            </label>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-slate-300 mb-1">Recipient(s)</label>
+          <input type="text" id="comm-recipient" required placeholder="All Active Collectors OR user@circulink.co.ke" class="w-full p-2.5 rounded-lg fluent-input text-white">
+        </div>
+
+        <div>
+          <label class="block text-slate-300 mb-1">Notification Template / Subject</label>
+          <input type="text" id="comm-subject" required placeholder="Weekly Price Spike Alert: PET now KES 35/Kg!" class="w-full p-2.5 rounded-lg fluent-input text-white">
+        </div>
+
+        <div>
+          <label class="block text-slate-300 mb-1">Message Body</label>
+          <textarea id="comm-body" rows="4" required class="w-full p-2.5 rounded-lg fluent-input text-white" placeholder="Dear Collector, bring your PET plastic bales to the Nairobi Hub today for instant M-Pesa payment..."></textarea>
+        </div>
+
+        <div class="pt-3 flex justify-end gap-2">
+          <button type="button" onclick="closeModal('modal-comm')" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 font-medium">Cancel</button>
+          <button type="submit" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold flex items-center gap-1.5">
+            <i data-lucide="send" class="w-3.5 h-3.5"></i>
+            <span>Dispatch Message</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 4: PRINTABLE RECEIPT / VOUCHER -->
+  <div id="print-modal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+    <div class="w-full max-w-xl bg-white text-slate-900 rounded-2xl p-8 space-y-6 shadow-2xl relative">
+      <button onclick="closeModal('print-modal')" class="no-print absolute top-4 right-4 text-slate-500 hover:text-slate-900"><i data-lucide="x" class="w-6 h-6"></i></button>
+
+      <!-- Printable Document Header -->
+      <div class="flex justify-between items-start border-b-2 border-slate-900 pb-4">
+        <div>
+          <h1 class="text-2xl font-black text-slate-900 tracking-tight">CIRCULINK RECYCLING</h1>
+          <p class="text-xs text-slate-600 uppercase tracking-widest font-bold">Official Payout Voucher & Tax Receipt</p>
+          <p class="text-xs text-slate-500 mt-0.5">Enterprise Registration: KRA-PIN P051928401Z</p>
+        </div>
+        <div class="text-right text-xs">
+          <p class="font-bold text-emerald-700" id="receipt-tx-code">TX-9481029</p>
+          <p id="receipt-date" class="text-slate-500">Date: 03 Oct 2026</p>
+        </div>
+      </div>
+
+      <!-- Content Details -->
+      <div id="receipt-body" class="space-y-4 text-xs">
+        <!-- Rendered dynamically via print function -->
+      </div>
+
+      <!-- Stamp / Signatures -->
+      <div class="pt-6 border-t border-slate-200 flex justify-between items-end text-slate-600 text-[11px]">
+        <div>
+          <p class="font-bold text-slate-800">Approved Hub Officer:</p>
+          <p class="italic">Sarah Jenkins (Managing Director)</p>
+        </div>
+        <div class="text-right">
+          <p class="text-[10px] text-slate-400">Generated automatically via CIRCULINK System</p>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="no-print flex justify-end gap-3 pt-4 border-t border-slate-200">
+        <button onclick="window.print()" class="px-5 py-2.5 rounded-xl bg-slate-900 text-white font-bold text-xs flex items-center gap-2 shadow-lg">
+          <i data-lucide="printer" class="w-4 h-4"></i>
+          <span>Print Document / Save PDF</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Application Logic JavaScript -->
+  <script>
+    // System Master State Data
+    const appData = {
+      viewMode: 'admin', // 'admin' or 'investor'
+      currentTab: 'dashboard',
+      tenants: [
+        { id: 'T-101', name: 'Nairobi Central Recycling Site', domain: 'nairobi.circulink.co.ke', region: 'Nairobi', status: 'Active', tonsDay: '45.2 T', petRate: 34, hdpeRate: 28 },
+        { id: 'T-102', name: 'Kibera Waste-to-Value Depot', domain: 'kibera.circulink.co.ke', region: 'Kibera', status: 'Active', tonsDay: '22.8 T', petRate: 32, hdpeRate: 26 },
+        { id: 'T-103', name: 'Mombasa Coastal Plastics Portal', domain: 'mombasa.circulink.co.ke', region: 'Mombasa', status: 'Active', tonsDay: '38.4 T', petRate: 36, hdpeRate: 30 },
+        { id: 'T-104', name: 'Nakuru Rift Materials Site', domain: 'nakuru.circulink.co.ke', region: 'Nakuru', status: 'Maintenance', tonsDay: '12.0 T', petRate: 30, hdpeRate: 24 }
+      ],
+      users: [
+        { id: 'U-201', name: 'David Mutua', phone: '+254 712 884 921', hub: 'Nairobi Central Hub', role: 'Collector', totalTons: '18.4 T', status: 'Verified' },
+        { id: 'U-202', name: 'Grace Wanjiku', phone: '+254 722 109 483', hub: 'Kibera Recycling Depot', role: 'Collector', totalTons: '12.1 T', status: 'Verified' },
+        { id: 'U-203', name: 'Emmanuel Ochieng', phone: '+254 733 992 011', hub: 'Mombasa Coastal Recycling', role: 'Supervisor', totalTons: '142.0 T', status: 'Verified' },
+        { id: 'U-204', name: 'Amina Hassan', phone: '+254 701 442 819', hub: 'Nakuru Rift Hub', role: 'Collector', totalTons: '8.6 T', status: 'Pending KYC' }
+      ],
+      pickups: [
+        { id: 'PK-8801', location: 'Industrial Area Sec 4', collector: 'David Mutua', wasteType: 'PET Bottles', weight: '850 Kg', status: 'Dispatched' },
+        { id: 'PK-8802', location: 'Gikomba Market Gate 2', collector: 'Grace Wanjiku', wasteType: 'Cardboard Bales', weight: '1,200 Kg', status: 'In Transit' },
+        { id: 'PK-8803', location: 'Nyali Beach Cleanup Point', collector: 'Emmanuel Ochieng', wasteType: 'HDPE Plastics', weight: '2,100 Kg', status: 'Completed' }
+      ],
+      inventory: [
+        { batchId: 'BAT-401', facility: 'Nairobi Central Hub', grade: 'Clear PET Flakes (A-Grade)', bales: 120, weight: '12,000 Kg', value: 408000 },
+        { batchId: 'BAT-402', facility: 'Mombasa Coastal Hub', grade: 'HDPE Rigid Plastic Bales', bales: 85, weight: '8,500 Kg', value: 255000 },
+        { batchId: 'BAT-403', facility: 'Kibera Depot', grade: 'Sorted Cardboard Bundles', bales: 210, weight: '15,000 Kg', value: 180000 }
+      ],
+      payouts: [
+        { code: 'MP-9481029', name: 'David Mutua', phone: '+254712884921', material: '850 Kg PET Plastics', amount: 28900, channel: 'M-Pesa B2C', status: 'Completed', date: '2026-10-02' },
+        { code: 'MP-9481030', name: 'Grace Wanjiku', phone: '+254722109483', material: '1,200 Kg Cardboard', amount: 14400, channel: 'M-Pesa B2C', status: 'Completed', date: '2026-10-02' },
+        { code: 'MP-9481031', name: 'Amina Hassan', phone: '+254701442819', material: '420 Kg HDPE Rigid', amount: 12600, channel: 'M-Pesa B2C', status: 'Pending', date: '2026-10-03' }
+      ],
+      auditLogs: [
+        { timestamp: '2026-10-03 03:22:10', user: 'Sarah Jenkins', action: 'Tenant site "Mombasa Coastal" payout rate updated to 36 KES/Kg' },
+        { timestamp: '2026-10-03 02:15:44', user: 'System Automated', action: 'Bulk M-Pesa B2C payout batch MP-9481029 executed successfully' },
+        { timestamp: '2026-10-02 18:40:02', user: 'Emmanuel Ochieng', action: 'Logistics pickup PK-8803 verified at weighbridge' }
+      ]
+    };
+
+    // DOM Initializer
+    window.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      initCharts();
+      renderAllSections();
+      updateFinancialModel();
+    });
+
+    // Navigation & Tab Switching
+    function switchTab(tabId) {
+      appData.currentTab = tabId;
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+      document.querySelectorAll('.nav-item').forEach(el => {
+        el.classList.remove('bg-fluent-primary', 'text-white');
+        el.classList.add('text-slate-300');
+      });
+
+      const activeNav = document.getElementById(`nav-${tabId}`);
+      if (activeNav) {
+        activeNav.classList.add('bg-fluent-primary', 'text-white');
+        activeNav.classList.remove('text-slate-300');
+      }
+    }
+
+    // View Mode Switcher (Admin vs Investor)
+    function switchViewMode(mode) {
+      appData.viewMode = mode;
+      const btnAdmin = document.getElementById('btn-mode-admin');
+      const btnInvestor = document.getElementById('btn-mode-investor');
+
+      if (mode === 'admin') {
+        btnAdmin.className = 'px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-200 flex items-center gap-1.5 bg-fluent-primary text-white shadow-md';
+        btnInvestor.className = 'px-3 py-1.5 rounded-md text-xs font-medium text-slate-400 hover:text-white transition-all duration-200 flex items-center gap-1.5';
+        switchTab('dashboard');
+        logAudit('User switched to Master Admin Command View');
+      } else {
+        btnInvestor.className = 'px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-200 flex items-center gap-1.5 bg-purple-600 text-white shadow-md';
+        btnAdmin.className = 'px-3 py-1.5 rounded-md text-xs font-medium text-slate-400 hover:text-white transition-all duration-200 flex items-center gap-1.5';
+        switchTab('financials');
+        logAudit('User switched to Investor Relations Mode');
+      }
+    }
+
+    // Render All Main Data Sections
+    function renderAllSections() {
+      renderDashboardTenants();
+      renderTenantCards();
+      renderUsersTable();
+      renderPickupsTable();
+      renderInventoryTable();
+      renderPayoutsTable();
+      renderAuditLogs();
+    }
+
+    // 1. Dashboard Overview Tenants Table
+    function renderDashboardTenants() {
+      const tbody = document.getElementById('dashboard-tenants-tbody');
+      tbody.innerHTML = appData.tenants.map(t => `
+        <tr class="hover:bg-white/5 transition-colors">
+          <td class="py-3 px-4 font-semibold text-white">
+            ${t.name}
+            <span class="block text-[10px] text-slate-400">${t.region}</span>
+          </td>
+          <td class="py-3 px-4 text-emerald-400 font-mono">${t.domain}</td>
+          <td class="py-3 px-4 font-bold text-white">${t.tonsDay}</td>
+          <td class="py-3 px-4">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold ${t.status === 'Active' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'}">
+              ${t.status}
+            </span>
+          </td>
+          <td class="py-3 px-4 text-right space-x-2">
+            <button onclick="toggleTenantStatus('${t.id}')" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-[11px] text-slate-300 border border-white/10">
+              ${t.status === 'Active' ? 'Suspend' : 'Activate'}
+            </button>
+            <button onclick="openEditTenantModal('${t.id}')" class="px-2.5 py-1 rounded bg-fluent-primary hover:bg-fluent-primaryHover text-[11px] text-white">
+              Configure
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // 2. Tenant Site Cards CRUD
+    function renderTenantCards() {
+      const container = document.getElementById('tenant-cards-container');
+      container.innerHTML = appData.tenants.map(t => `
+        <div class="fluent-glass p-5 rounded-2xl flex flex-col justify-between space-y-4 border border-white/10">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold ${t.status === 'Active' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300'}">
+                ${t.status}
+              </span>
+              <span class="text-xs text-slate-400 font-mono">${t.id}</span>
+            </div>
+            <h3 class="text-base font-bold text-white mt-2">${t.name}</h3>
+            <p class="text-xs text-emerald-400 font-mono mt-0.5">${t.domain}</p>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 text-xs bg-slate-900/60 p-3 rounded-xl border border-white/5">
+            <div>
+              <span class="text-slate-400 block text-[10px]">PET Rate / Kg</span>
+              <span class="font-bold text-white font-mono">KES ${t.petRate}</span>
+            </div>
+            <div>
+              <span class="text-slate-400 block text-[10px]">HDPE Rate / Kg</span>
+              <span class="font-bold text-white font-mono">KES ${t.hdpeRate}</span>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between pt-2 border-t border-white/10">
+            <button onclick="toggleTenantStatus('${t.id}')" class="text-xs ${t.status === 'Active' ? 'text-rose-400 hover:underline' : 'text-emerald-400 hover:underline'}">
+              ${t.status === 'Active' ? 'Suspend Site' : 'Activate Site'}
+            </button>
+            <div class="flex gap-2">
+              <button onclick="openEditTenantModal('${t.id}')" class="p-1.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200">
+                <i data-lucide="edit" class="w-3.5 h-3.5"></i>
+              </button>
+              <button onclick="deleteTenant('${t.id}')" class="p-1.5 rounded bg-rose-500/20 text-rose-300 hover:bg-rose-500/40">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    // 3. Render Users Table
+    function renderUsersTable() {
+      const filterRole = document.getElementById('user-filter-role').value;
+      const filtered = appData.users.filter(u => filterRole === 'all' || u.role === filterRole);
+      
+      document.getElementById('users-count-text').innerText = `Showing ${filtered.length} users`;
+      const tbody = document.getElementById('users-tbody');
+      
+      tbody.innerHTML = filtered.map(u => `
+        <tr class="hover:bg-white/5 transition-colors">
+          <td class="py-3 px-4 font-semibold text-white">${u.name}</td>
+          <td class="py-3 px-4 font-mono text-slate-300">${u.phone}</td>
+          <td class="py-3 px-4 text-slate-300">${u.hub}</td>
+          <td class="py-3 px-4">
+            <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-500/20 text-blue-300">${u.role}</span>
+          </td>
+          <td class="py-3 px-4 font-bold text-emerald-400 font-mono">${u.totalTons}</td>
+          <td class="py-3 px-4">
+            <span class="px-2 py-0.5 rounded-full text-[10px] ${u.status === 'Verified' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300'}">${u.status}</span>
+          </td>
+          <td class="py-3 px-4 text-right">
+            <button onclick="deleteUser('${u.id}')" class="text-rose-400 hover:underline text-xs">Delete</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // 4. Pickups Table
+    function renderPickupsTable() {
+      const tbody = document.getElementById('pickups-tbody');
+      tbody.innerHTML = appData.pickups.map(p => `
+        <tr class="hover:bg-white/5">
+          <td class="py-3 px-4 font-mono text-emerald-400 font-bold">${p.id}</td>
+          <td class="py-3 px-4 text-white">${p.location}</td>
+          <td class="py-3 px-4 text-slate-300">${p.collector}</td>
+          <td class="py-3 px-4 text-slate-300">${p.wasteType}</td>
+          <td class="py-3 px-4 font-bold text-white font-mono">${p.weight}</td>
+          <td class="py-3 px-4">
+            <span class="px-2 py-0.5 rounded-full text-[10px] bg-blue-500/20 text-blue-300">${p.status}</span>
+          </td>
+          <td class="py-3 px-4 text-right">
+            <button onclick="updatePickupStatus('${p.id}')" class="px-2 py-1 rounded bg-slate-800 text-xs text-slate-200 hover:bg-slate-700">Advance Status</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // 5. Inventory Table
+    function renderInventoryTable() {
+      const tbody = document.getElementById('inventory-tbody');
+      tbody.innerHTML = appData.inventory.map(i => `
+        <tr class="hover:bg-white/5">
+          <td class="py-3 px-4 font-mono text-teal-400 font-bold">${i.batchId}</td>
+          <td class="py-3 px-4 text-white">${i.facility}</td>
+          <td class="py-3 px-4 text-slate-300">${i.grade}</td>
+          <td class="py-3 px-4 font-bold text-white font-mono">${i.bales} Bales</td>
+          <td class="py-3 px-4 font-bold text-slate-200 font-mono">${i.weight}</td>
+          <td class="py-3 px-4 text-emerald-400 font-bold font-mono">KES ${i.value.toLocaleString()}</td>
+          <td class="py-3 px-4 text-right">
+            <button onclick="deleteInventory('${i.batchId}')" class="text-rose-400 hover:underline text-xs">Remove</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // 6. Payouts Table
+    function renderPayoutsTable() {
+      const tbody = document.getElementById('payouts-tbody');
+      tbody.innerHTML = appData.payouts.map(p => `
+        <tr class="hover:bg-white/5">
+          <td class="py-3 px-4 font-mono text-emerald-400 font-bold">${p.code}</td>
+          <td class="py-3 px-4">
+            <span class="font-semibold text-white block">${p.name}</span>
+            <span class="text-[10px] text-slate-400 font-mono">${p.phone}</span>
+          </td>
+          <td class="py-3 px-4 text-slate-300">${p.material}</td>
+          <td class="py-3 px-4 font-bold text-white font-mono">KES ${p.amount.toLocaleString()}</td>
+          <td class="py-3 px-4 text-teal-300 font-semibold text-[11px]">${p.channel}</td>
+          <td class="py-3 px-4">
+            <span class="px-2 py-0.5 rounded-full text-[10px] ${p.status === 'Completed' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300'}">${p.status}</span>
+          </td>
+          <td class="py-3 px-4 text-right">
+            <button onclick="openPrintReceipt('${p.code}')" class="px-2.5 py-1 rounded bg-slate-800 text-xs text-slate-200 hover:bg-slate-700 flex items-center gap-1.5 ml-auto">
+              <i data-lucide="file-text" class="w-3.5 h-3.5 text-emerald-400"></i>
+              <span>Voucher</span>
+            </button>
+          </td>
+        </tr>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    // Financial & ROI Interactive Calculator Engine
+    function updateFinancialModel() {
+      const tons = parseInt(document.getElementById('slider-tons').value);
+      const price = parseInt(document.getElementById('slider-price').value);
+      const margin = parseInt(document.getElementById('slider-margin').value);
+
+      document.getElementById('slider-tons-val').innerText = `${tons} Tons/Day`;
+      document.getElementById('slider-price-val').innerText = `KES ${price.toLocaleString()}`;
+      document.getElementById('slider-margin-val').innerText = `${margin}% of Gross`;
+
+      // Calculations: 365 days / yr
+      const arr = tons * price * 365;
+      const ebitda = arr * ((100 - margin) / 100) * 0.45; // EBITDA net yield factor
+      const irr = (ebitda / 1200000000) * 100; // Return on series A base
+
+      document.getElementById('model-arr').innerText = `KES ${Math.round(arr).toLocaleString()}`;
+      document.getElementById('model-ebitda').innerText = `KES ${Math.round(ebitda).toLocaleString()}`;
+      document.getElementById('model-irr').innerText = `${irr.toFixed(1)}% Return`;
+    }
+
+    // Modal Operations
+    function openNewTenantModal() {
+      document.getElementById('modal-tenant-title').innerText = 'Provision New Collector Site';
+      document.getElementById('form-tenant').reset();
+      document.getElementById('tenant-id').value = '';
+      document.getElementById('modal-tenant').classList.remove('hidden');
+      document.getElementById('modal-tenant').classList.add('flex');
+    }
+
+    function openEditTenantModal(id) {
+      const tenant = appData.tenants.find(t => t.id === id);
+      if (!tenant) return;
+      document.getElementById('modal-tenant-title').innerText = 'Edit Tenant Configuration';
+      document.getElementById('tenant-id').value = tenant.id;
+      document.getElementById('tenant-name').value = tenant.name;
+      document.getElementById('tenant-domain').value = tenant.domain;
+      document.getElementById('tenant-region').value = tenant.region;
+      document.getElementById('tenant-rate-pet').value = tenant.petRate;
+      document.getElementById('tenant-rate-hdpe').value = tenant.hdpeRate;
+      document.getElementById('tenant-status').value = tenant.status;
+      
+      document.getElementById('modal-tenant').classList.remove('hidden');
+      document.getElementById('modal-tenant').classList.add('flex');
+    }
+
+    function saveTenant(e) {
+      e.preventDefault();
+      const id = document.getElementById('tenant-id').value || `T-${Math.floor(100 + Math.random() * 900)}`;
+      const name = document.getElementById('tenant-name').value;
+      const domain = document.getElementById('tenant-domain').value;
+      const region = document.getElementById('tenant-region').value;
+      const petRate = parseInt(document.getElementById('tenant-rate-pet').value);
+      const hdpeRate = parseInt(document.getElementById('tenant-rate-hdpe').value);
+      const status = document.getElementById('tenant-status').value;
+
+      const index = appData.tenants.findIndex(t => t.id === id);
+      if (index >= 0) {
+        appData.tenants[index] = { ...appData.tenants[index], name, domain, region, petRate, hdpeRate, status };
+        logAudit(`Updated collector site parameters for ${name}`);
+      } else {
+        appData.tenants.push({ id, name, domain, region, status, tonsDay: '0.0 T', petRate, hdpeRate });
+        logAudit(`Provisioned new collector site: ${name} (${domain})`);
+      }
+
+      closeModal('modal-tenant');
+      renderAllSections();
+    }
+
+    function toggleTenantStatus(id) {
+      const tenant = appData.tenants.find(t => t.id === id);
+      if (tenant) {
+        tenant.status = tenant.status === 'Active' ? 'Suspended' : 'Active';
+        logAudit(`Toggled site ${tenant.name} status to ${tenant.status}`);
+        renderAllSections();
+      }
+    }
+
+    function deleteTenant(id) {
+      appData.tenants = appData.tenants.filter(t => t.id !== id);
+      logAudit(`Deleted tenant site ID ${id}`);
+      renderAllSections();
+    }
+
+    // User CRUD
+    function openNewUserModal() {
+      document.getElementById('form-user').reset();
+      document.getElementById('modal-user').classList.remove('hidden');
+      document.getElementById('modal-user').classList.add('flex');
+    }
+
+    function saveUser(e) {
+      e.preventDefault();
+      const name = document.getElementById('user-name').value;
+      const phone = document.getElementById('user-phone').value;
+      const role = document.getElementById('user-role').value;
+      const hub = document.getElementById('user-hub').value;
+
+      appData.users.push({
+        id: `U-${Math.floor(200 + Math.random() * 800)}`,
+        name, phone, role, hub, totalTons: '0.0 T', status: 'Verified'
+      });
+
+      logAudit(`Registered new user ${name} (${role}) assigned to ${hub}`);
+      closeModal('modal-user');
+      renderUsersTable();
+    }
+
+    function deleteUser(id) {
+      appData.users = appData.users.filter(u => u.id !== id);
+      logAudit(`Removed user ID ${id}`);
+      renderUsersTable();
+    }
+
+    // Communication Modal & Dispatch
+    function openCommunicationModal() {
+      document.getElementById('modal-comm').classList.remove('hidden');
+      document.getElementById('modal-comm').classList.add('flex');
+    }
+
+    function sendCommunication(e) {
+      e.preventDefault();
+      const recipient = document.getElementById('comm-recipient').value;
+      const subject = document.getElementById('comm-subject').value;
+      const channel = document.querySelector('input[name="comm-channel"]:checked').value;
+
+      logAudit(`Dispatched ${channel} message to [${recipient}]: "${subject}"`);
+      alert(`Message successfully queued and dispatched via ${channel} Gateway!`);
+      closeModal('modal-comm');
+    }
+
+    // M-Pesa Bulk B2C Simulation
+    function triggerBulkMpesaPayout() {
+      const code = `MP-${Math.floor(9000000 + Math.random() * 900000)}`;
+      appData.payouts.unshift({
+        code: code,
+        name: 'Bulk Collector Batch',
+        phone: 'Multiple (14 Recipients)',
+        material: 'Aggregated Plastic Balings',
+        amount: 142500,
+        channel: 'M-Pesa B2C Bulk API',
+        status: 'Completed',
+        date: new Date().toISOString().split('T')[0]
+      });
+
+      logAudit(`Executed Bulk M-Pesa B2C Payout Batch ${code} totaling KES 142,500`);
+      renderPayoutsTable();
+      alert(`Bulk M-Pesa B2C Dispatched successfully! Batch Reference: ${code}`);
+    }
+
+    // Printable Tax Receipt & Voucher Generation
+    function openPrintReceipt(txCode) {
+      const payout = appData.payouts.find(p => p.code === txCode) || appData.payouts[0];
+      document.getElementById('receipt-tx-code').innerText = payout.code;
+      document.getElementById('receipt-date').innerText = `Date: ${payout.date}`;
+
+      const body = document.getElementById('receipt-body');
+      body.innerHTML = `
+        <div class="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
+          <div>
+            <p class="text-slate-500 font-medium">Beneficiary Collector Name:</p>
+            <p class="font-bold text-slate-900 text-sm">${payout.name}</p>
+            <p class="font-mono text-slate-600">${payout.phone}</p>
+          </div>
+          <div>
+            <p class="text-slate-500 font-medium">Payment Channel / Route:</p>
+            <p class="font-bold text-emerald-700 text-sm">${payout.channel}</p>
+            <p class="text-slate-600">M-Pesa Express Instant</p>
+          </div>
+        </div>
+
+        <table class="w-full text-left border-collapse border border-slate-200">
+          <thead class="bg-slate-100 text-slate-700">
+            <tr>
+              <th class="p-2 border border-slate-200">Material Stream</th>
+              <th class="p-2 border border-slate-200 text-right">Disbursement (KES)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="p-2 border border-slate-200 font-medium text-slate-800">${payout.material}</td>
+              <td class="p-2 border border-slate-200 text-right font-bold text-slate-900">KES ${payout.amount.toLocaleString()}</td>
+            </tr>
+            <tr class="bg-slate-50 font-bold">
+              <td class="p-2 border border-slate-200 text-right">Total Disbursed:</td>
+              <td class="p-2 border border-slate-200 text-right text-emerald-700 text-sm">KES ${payout.amount.toLocaleString()}</td>
+            </tr>
+          </tbody>
+        </table>
+      `;
+
+      document.getElementById('print-modal').classList.remove('hidden');
+      document.getElementById('print-modal').classList.add('flex');
+      lucide.createIcons();
+    }
+
+    // Monthly Audit Report Printing
+    function generateMonthlyAuditReport() {
+      openPrintReceipt(appData.payouts[0].code);
+    }
+
+    // Global Search Handler
+    function handleGlobalSearch() {
+      const q = document.getElementById('global-search').value.toLowerCase();
+      if (!q) return;
+
+      const filteredUsers = appData.users.filter(u => u.name.toLowerCase().includes(q) || u.phone.includes(q));
+      if (filteredUsers.length > 0) {
+        switchTab('users');
+      }
+    }
+
+    // Audit Logging Engine
+    function logAudit(action) {
+      const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
+      appData.auditLogs.unshift({ timestamp, user: 'Sarah Jenkins (Master Admin)', action });
+      renderAuditLogs();
+    }
+
+    function renderAuditLogs() {
+      const container = document.getElementById('audit-logs-container');
+      if (!container) return;
+      container.innerHTML = appData.auditLogs.map(l => `
+        <div class="p-3 rounded-lg bg-slate-900/80 border border-white/5 flex flex-col md:flex-row md:items-center justify-between gap-1">
+          <span class="text-emerald-400 font-bold">[${l.timestamp}]</span>
+          <span class="text-slate-300 font-medium flex-1 md:ml-4">${l.action}</span>
+          <span class="text-slate-500 text-[10px] uppercase font-semibold">${l.user}</span>
+        </div>
+      `).join('');
+    }
+
+    function clearAuditLogs() {
+      appData.auditLogs = [];
+      renderAuditLogs();
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+      document.getElementById(id).classList.remove('flex');
+    }
+
+    // Chart.js Visualizations Initialization
+    function initCharts() {
+      // 1. Overview Line Chart
+      const ctxOverview = document.getElementById('overviewChart').getContext('2d');
+      new Chart(ctxOverview, {
+        type: 'line',
+        data: {
+          labels: ['May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'],
+          datasets: [
+            {
+              label: 'Revenue (KES Millions)',
+              data: [8.2, 9.5, 11.0, 12.8, 13.4, 14.8],
+              borderColor: '#00b7c3',
+              backgroundColor: 'rgba(0, 183, 195, 0.1)',
+              fill: true,
+              tension: 0.4
+            },
+            {
+              label: 'Processed Volume (Tons)',
+              data: [850, 920, 1100, 1250, 1380, 1482],
+              borderColor: '#107c41',
+              backgroundColor: 'rgba(16, 124, 65, 0.1)',
+              fill: true,
+              tension: 0.4
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { labels: { color: '#94a3b8', font: { size: 11 } } } },
+          scales: {
+            x: { ticks: { color: '#64748b' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+            y: { ticks: { color: '#64748b' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+          }
+        }
+      });
+
+      // 2. Material Doughnut Chart
+      const ctxDoughnut = document.getElementById('materialDoughnutChart').getContext('2d');
+      new Chart(ctxDoughnut, {
+        type: 'doughnut',
+        data: {
+          labels: ['PET Plastic', 'HDPE Rigid', 'Cardboard', 'E-Waste / Metals'],
+          datasets: [{
+            data: [42, 28, 18, 12],
+            backgroundColor: ['#10b981', '#3b82f6', '#2dd4bf', '#f59e0b'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          cutout: '70%'
+        }
+      });
+    }
+  </script>
+</body>
+</html>

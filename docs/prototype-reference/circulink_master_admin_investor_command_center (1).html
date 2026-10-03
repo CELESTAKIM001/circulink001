@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CIRCULINK - Master Admin & Investor Command Center</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        fluent: {
+                            blue: '#0078D4',
+                            blueHover: '#106EBE',
+                            teal: '#00B7C3',
+                            green: '#107C41',
+                            amber: '#D97706',
+                            red: '#D13438',
+                            bgDark: '#0f172a',
+                            surfaceDark: 'rgba(30, 41, 59, 0.7)',
+                            cardDark: 'rgba(30, 41, 59, 0.85)',
+                            bgLight: '#f3f4f6',
+                            surfaceLight: 'rgba(255, 255, 255, 0.75)',
+                            cardLight: 'rgba(255, 255, 255, 0.9)'
+                        }
+                    },
+                    fontFamily: {
+                        segoe: ['"Segoe UI"', 'SegoeUI', '"Segoe Variable Display"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: "Segoe UI", "Segoe Variable Display", -apple-system, BlinkMacSystemFont, sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        .acrylic-surface {
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+        }
+
+        .dark .fluent-card {
+            background: rgba(30, 41, 59, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .light .fluent-card {
+            background: rgba(255, 255, 255, 0.85);
+            border: 1px solid rgba(229, 231, 235, 0.8);
+            box-shadow: 0 8px 24px 0 rgba(149, 157, 165, 0.12);
+        }
+
+        .fluent-card-hover {
+            transition: transform 0.2s cubic-bezier(0.1, 0.9, 0.2, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+
+        .fluent-card-hover:hover {
+            transform: translateY(-3px);
+        }
+
+        .dark .fluent-card-hover:hover {
+            border-color: rgba(0, 120, 212, 0.5);
+            box-shadow: 0 12px 28px 0 rgba(0, 120, 212, 0.2);
+        }
+
+        .light .fluent-card-hover:hover {
+            border-color: rgba(0, 120, 212, 0.4);
+            box-shadow: 0 12px 28px 0 rgba(0, 120, 212, 0.15);
+        }
+
+        /* Custom Scrollbar for Fluent feel */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(156, 163, 175, 0.4);
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(156, 163, 175, 0.7);
+        }
+
+        /* Print styles for tax receipts & slips */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #printableArea, #printableArea * {
+                visibility: visible;
+            }
+            #printableArea {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                color: black !important;
+                background: white !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-blue-500 selection:text-white transition-colors duration-300">
+
+    <header class="sticky top-0 z-40 w-full acrylic-surface bg-slate-900/80 dark:bg-slate-900/80 light:bg-white/80 border-b border-slate-700/50 px-4 lg:px-8 py-3 flex items-center justify-between shadow-lg no-print">
+        <div class="flex items-center gap-3">
+            <button id="mobileNavToggle" class="lg:hidden p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 focus:outline-none">
+                <i class="fa-solid fa-bars text-lg"></i>
+            </button>
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 via-teal-500 to-blue-600 flex items-center justify-center text-white shadow-lg shadow-emerald-500/20 font-bold text-xl tracking-wider">
+                    <i class="fa-solid fa-recycle"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold tracking-tight bg-gradient-to-r from-emerald-400 via-teal-300 to-blue-400 bg-clip-text text-transparent">CIRCULINK</h1>
+                    <p class="text-xs text-slate-400 font-medium hidden sm:block">Tuna Taka Taka Master Admin & Investor Command Center</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Global Search & System Tools -->
+        <div class="flex items-center gap-3">
+            <div class="relative hidden md:block w-64 lg:w-80">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                <input type="text" id="globalSearchInput" onkeyup="handleGlobalSearch()" placeholder="Search transactions, pickups, hubs..." class="w-full bg-slate-800/80 text-xs text-slate-200 placeholder-slate-400 pl-9 pr-4 py-2 rounded-lg border border-slate-700/60 focus:outline-none focus:border-blue-500 transition-all">
+            </div>
+
+            <!-- Currency/Region Quick Tag -->
+            <div class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-slate-800/60 border border-slate-700/50 rounded-lg text-xs font-semibold text-emerald-400">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>KES (KSh) - Kenya</span>
+            </div>
+
+            <!-- Theme Toggle Button -->
+            <button id="themeToggleBtn" onclick="toggleTheme()" class="p-2.5 rounded-lg bg-slate-800/80 border border-slate-700/60 text-slate-300 hover:text-white hover:bg-slate-700 transition-all" title="Toggle Light/Dark Theme">
+                <i class="fa-solid fa-moon text-sm" id="themeIcon"></i>
+            </button>
+
+            <!-- User Profile Dropdown / Modal Trigger -->
+            <div class="flex items-center gap-2 pl-2 border-l border-slate-700/60">
+                <div class="w-8 h-8 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center border-2 border-blue-400/50 shadow-md">
+                    EA
+                </div>
+                <div class="hidden xl:block text-left">
+                    <div class="text-xs font-bold leading-tight">Executive Admin</div>
+                    <div class="text-[10px] text-slate-400">Investor Access Level</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex-1 flex overflow-hidden">
+
+        <!-- Sidebar Navigation -->
+        <aside id="sidebar" class="w-64 acrylic-surface bg-slate-900/90 border-r border-slate-800/80 flex flex-col justify-between transition-all duration-300 z-30 fixed lg:relative inset-y-0 left-0 -translate-x-full lg:translate-x-0 no-print">
+            <div class="p-4 space-y-1 overflow-y-auto">
+                <div class="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">Core Navigation</div>
+                
+                <button onclick="switchTab('investorTab')" id="nav-investorTab" class="nav-btn active w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-white bg-blue-600/90 shadow-md shadow-blue-600/20 border border-blue-400/30 transition-all">
+                    <i class="fa-solid fa-chart-line text-sm w-4 text-center"></i>
+                    <span>Financial & Investor Engine</span>
+                </button>
+
+                <button onclick="switchTab('operationsTab')" id="nav-operationsTab" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800/70 hover:text-white transition-all">
+                    <i class="fa-solid fa-truck-pickup text-sm w-4 text-center"></i>
+                    <span>Live Pickups & Logistics</span>
+                </button>
+
+                <button onclick="switchTab('tenantsTab')" id="nav-tenantsTab" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800/70 hover:text-white transition-all">
+                    <i class="fa-solid fa-city text-sm w-4 text-center"></i>
+                    <span>Tenant Portals & Sites</span>
+                </button>
+
+                <button onclick="switchTab('mpesaTab')" id="nav-mpesaTab" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800/70 hover:text-white transition-all">
+                    <i class="fa-solid fa-wallet text-sm w-4 text-center"></i>
+                    <span>M-Pesa B2C Ledger</span>
+                </button>
+
+                <button onclick="switchTab('hubsTab')" id="nav-hubsTab" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800/70 hover:text-white transition-all">
+                    <i class="fa-solid fa-boxes-packing text-sm w-4 text-center"></i>
+                    <span>Sorting Hubs & Off-Takers</span>
+                </button>
+
+                <button onclick="switchTab('auditTab')" id="nav-auditTab" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800/70 hover:text-white transition-all">
+                    <i class="fa-solid fa-shield-halved text-sm w-4 text-center"></i>
+                    <span>Dispatch & Audit Trail</span>
+                </button>
+            </div>
+
+            <div class="p-4 border-t border-slate-800/80 space-y-3">
+                <div class="p-3 rounded-xl bg-gradient-to-r from-emerald-950/60 to-slate-900 border border-emerald-500/20">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-[11px] font-bold text-emerald-400"><i class="fa-solid fa-leaf mr-1"></i> Carbon Impact</span>
+                        <span class="text-[10px] text-slate-400">Active</span>
+                    </div>
+                    <div class="text-sm font-bold text-white" id="sidebarCarbonImpact">1,284.5 tCO2e</div>
+                    <p class="text-[10px] text-slate-400 mt-1">Directly avoided in Q3/Q4</p>
+                </div>
+                <div class="text-[10px] text-slate-500 text-center">CIRCULINK v3.4 Fluent Edition</div>
+            </div>
+        </aside>
+
+        <main class="flex-1 overflow-y-auto p-4 lg:p-8 space-y-6">
+
+            <!-- TAB 1: EXECUTIVE INVESTOR COMMAND & FINANCIAL ENGINE -->
+            <section id="investorTab" class="tab-content space-y-6">
+                <!-- Header Banner -->
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 rounded-2xl fluent-card bg-gradient-to-r from-slate-900/90 via-slate-800/80 to-blue-950/50">
+                    <div>
+                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide bg-blue-500/20 text-blue-300 border border-blue-500/30 mb-2 inline-block">Real-time Financial Analytics</span>
+                        <h2 class="text-2xl font-bold text-white tracking-tight">Financial Income, Expense & Profit Engine</h2>
+                        <p class="text-xs text-slate-300 mt-1">Monitor revenue cycles, operational expenditures, and dynamic profit trends with custom metric editing.</p>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button onclick="openFinancialEditorModal()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-lg shadow-emerald-600/30 transition-all flex items-center gap-2">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                            <span>Edit Financial Metrics</span>
+                        </button>
+                        <button onclick="window.print()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition-all flex items-center gap-2">
+                            <i class="fa-solid fa-print"></i>
+                            <span>Export / Print Report</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Financial Metric Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="p-5 rounded-2xl fluent-card fluent-card-hover relative overflow-hidden">
+                        <div class="text-xs font-semibold text-slate-400 mb-1">Total Gross Income</div>
+                        <div class="text-2xl font-bold text-emerald-400" id="cardTotalIncome">KSh 14,850,000</div>
+                        <div class="flex items-center gap-1 text-[11px] text-emerald-400 mt-2 font-medium">
+                            <i class="fa-solid fa-arrow-trend-up"></i> +18.4% vs last period
+                        </div>
+                    </div>
+
+                    <div class="p-5 rounded-2xl fluent-card fluent-card-hover relative overflow-hidden">
+                        <div class="text-xs font-semibold text-slate-400 mb-1">Total Operational Expenses</div>
+                        <div class="text-2xl font-bold text-rose-400" id="cardTotalExpenses">KSh 8,240,000</div>
+                        <div class="flex items-center gap-1 text-[11px] text-rose-400 mt-2 font-medium">
+                            <i class="fa-solid fa-arrow-trend-down"></i> -3.1% overhead optimization
+                        </div>
+                    </div>
+
+                    <div class="p-5 rounded-2xl fluent-card fluent-card-hover relative overflow-hidden">
+                        <div class="text-xs font-semibold text-slate-400 mb-1">Net Operating Profit</div>
+                        <div class="text-2xl font-bold text-blue-400" id="cardNetProfit">KSh 6,610,000</div>
+                        <div class="flex items-center gap-1 text-[11px] text-blue-400 mt-2 font-medium">
+                            <i class="fa-solid fa-chart-pie"></i> <span id="cardProfitMargin">44.5%</span> Net Margin
+                        </div>
+                    </div>
+
+                    <div class="p-5 rounded-2xl fluent-card fluent-card-hover relative overflow-hidden">
+                        <div class="text-xs font-semibold text-slate-400 mb-1">Total Tonnage Processed</div>
+                        <div class="text-2xl font-bold text-amber-400" id="cardTotalTonnage">1,842 TONS</div>
+                        <div class="flex items-center gap-1 text-[11px] text-amber-400 mt-2 font-medium">
+                            <i class="fa-solid fa-truck-ramp-box"></i> 94.2% off-taker fill rate
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DYNAMIC GRAPH SECTION WITH TIME RANGE FILTERS & TOGGLES -->
+                <div class="p-6 rounded-2xl fluent-card space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-700/60">
+                        <div>
+                            <h3 class="text-base font-bold text-white flex items-center gap-2">
+                                <i class="fa-solid fa-chart-area text-blue-400"></i>
+                                Live Financial Performance Chart
+                            </h3>
+                            <p class="text-xs text-slate-400">Income vs. Operational Expenses vs. Net Profit trajectory</p>
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-2">
+                            <!-- Date Range Filters -->
+                            <div class="flex items-center bg-slate-800/80 p-1 rounded-xl border border-slate-700/60 text-xs">
+                                <button onclick="setGraphTimeframe('7d')" id="tf-7d" class="tf-btn px-3 py-1 rounded-lg text-slate-400 hover:text-white transition-all">7D</button>
+                                <button onclick="setGraphTimeframe('30d')" id="tf-30d" class="tf-btn px-3 py-1 rounded-lg text-slate-400 hover:text-white transition-all">30D</button>
+                                <button onclick="setGraphTimeframe('ytd')" id="tf-ytd" class="tf-btn active px-3 py-1 rounded-lg text-white bg-blue-600 font-semibold shadow-sm transition-all">YTD</button>
+                                <button onclick="setGraphTimeframe('1y')" id="tf-1y" class="tf-btn px-3 py-1 rounded-lg text-slate-400 hover:text-white transition-all">1Y</button>
+                            </div>
+
+                            <!-- Graph Metric Toggle Checkboxes -->
+                            <div class="flex items-center gap-3 text-xs bg-slate-800/60 px-3 py-1.5 rounded-xl border border-slate-700/50">
+                                <label class="flex items-center gap-1.5 cursor-pointer text-emerald-400">
+                                    <input type="checkbox" id="chkIncome" checked onchange="renderFinancialGraph()" class="rounded border-slate-700 bg-slate-900 text-emerald-500 focus:ring-0">
+                                    Income
+                                </label>
+                                <label class="flex items-center gap-1.5 cursor-pointer text-rose-400">
+                                    <input type="checkbox" id="chkExpenses" checked onchange="renderFinancialGraph()" class="rounded border-slate-700 bg-slate-900 text-rose-500 focus:ring-0">
+                                    Expenses
+                                </label>
+                                <label class="flex items-center gap-1.5 cursor-pointer text-blue-400">
+                                    <input type="checkbox" id="chkProfit" checked onchange="renderFinancialGraph()" class="rounded border-slate-700 bg-slate-900 text-blue-500 focus:ring-0">
+                                    Profit
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Dynamic SVG Graph Viewport -->
+                    <div class="relative w-full h-72 bg-slate-950/60 rounded-xl p-4 border border-slate-800 flex flex-col justify-between overflow-hidden">
+                        <svg id="financialGraphSvg" class="w-full h-full overflow-visible" viewBox="0 0 800 220" preserveAspectRatio="none">
+                            <!-- SVG elements rendered dynamically via JavaScript -->
+                        </svg>
+
+                        <!-- Graph Tooltip / Hover overlay -->
+                        <div id="graphTooltip" class="absolute hidden bg-slate-900/95 border border-slate-700 text-white text-xs p-3 rounded-xl shadow-xl pointer-events-none z-20 backdrop-blur-md">
+                            <!-- Tooltip details injected dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Graph Legend & Indicators -->
+                    <div class="flex flex-wrap items-center justify-between text-xs text-slate-400 pt-2">
+                        <div class="flex items-center gap-6">
+                            <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span> Income Stream</span>
+                            <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-rose-500 inline-block"></span> Operational Expenses</span>
+                            <span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-blue-500 inline-block"></span> Net Profit</span>
+                        </div>
+                        <div class="text-[11px] text-slate-500">Updated in real-time from active hub ledgers</div>
+                    </div>
+                </div>
+
+                <!-- Financial Line Item Breakdown Table -->
+                <div class="p-6 rounded-2xl fluent-card space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-700/60">
+                        <div>
+                            <h3 class="text-base font-bold text-white">Financial Line Items Breakdown</h3>
+                            <p class="text-xs text-slate-400">Categorized Income streams and Operational Expense disbursements</p>
+                        </div>
+                        <button onclick="openAddFinancialLineItemModal()" class="px-3.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-200 transition-all flex items-center gap-2">
+                            <i class="fa-solid fa-plus text-xs"></i>
+                            <span>Add Financial Entry</span>
+                        </button>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-800/80 text-slate-400 font-semibold border-b border-slate-700/80">
+                                <tr>
+                                    <th class="p-3">Category</th>
+                                    <th class="p-3">Line Item Description</th>
+                                    <th class="p-3">Type</th>
+                                    <th class="p-3">Amount (KES)</th>
+                                    <th class="p-3">Hub Allocation</th>
+                                    <th class="p-3 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="financialTableBody" class="divide-y divide-slate-800/80 font-medium">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 2: OPERATIONS & LIVE PICKUPS -->
+            <section id="operationsTab" class="tab-content hidden space-y-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-2xl fluent-card bg-slate-900/80">
+                    <div>
+                        <h2 class="text-xl font-bold text-white">Live Pickup Operations & Scheduling</h2>
+                        <p class="text-xs text-slate-400 mt-0.5">Manage scheduled collections, dispatch field teams, and print pickup slips.</p>
+                    </div>
+                    <button onclick="openPickupModal()" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-lg shadow-blue-600/30 transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-calendar-plus"></i>
+                        <span>Schedule New Pickup</span>
+                    </button>
+                </div>
+
+                <div class="p-6 rounded-2xl fluent-card space-y-4">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div class="flex items-center gap-2">
+                            <input type="text" id="pickupSearch" onkeyup="filterPickups()" placeholder="Filter by client or location..." class="bg-slate-800 text-xs px-3 py-2 rounded-lg border border-slate-700 text-slate-200 w-64 focus:outline-none focus:border-blue-500">
+                            <select id="pickupStatusFilter" onchange="filterPickups()" class="bg-slate-800 text-xs px-3 py-2 rounded-lg border border-slate-700 text-slate-200 focus:outline-none">
+                                <option value="ALL font-semibold">All Statuses</option>
+                                <option value="Scheduled">Scheduled</option>
+                                <option value="In Progress">In Progress</option>
+                                <option value="Completed">Completed</option>
+                                <option value="Cancelled">Cancelled</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-800/80 text-slate-400 font-semibold border-b border-slate-700/80">
+                                <tr>
+                                    <th class="p-3">Pickup ID</th>
+                                    <th class="p-3">Client / Site Name</th>
+                                    <th class="p-3">Location & Hub</th>
+                                    <th class="p-3">Material Grade</th>
+                                    <th class="p-3">Est. Weight</th>
+                                    <th class="p-3">Status</th>
+                                    <th class="p-3 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pickupsTableBody" class="divide-y divide-slate-800/80">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 3: TENANT SITES & PORTAL MANAGEMENT -->
+            <section id="tenantsTab" class="tab-content hidden space-y-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-2xl fluent-card bg-slate-900/80">
+                    <div>
+                        <h2 class="text-xl font-bold text-white">Tenant Sites & Custom Domain Portals</h2>
+                        <p class="text-xs text-slate-400 mt-0.5">Provision corporate client portals, map custom domains, and set maintenance states.</p>
+                    </div>
+                    <button onclick="openTenantModal()" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-lg shadow-blue-600/30 transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-plus-circle"></i>
+                        <span>Provision New Tenant Portal</span>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="tenantsGrid">
+                    <!-- Populated dynamically -->
+                </div>
+            </section>
+
+            <!-- TAB 4: M-PESA FINANCIAL LEDGER & B2C DISBURSEMENTS -->
+            <section id="mpesaTab" class="tab-content hidden space-y-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-2xl fluent-card bg-slate-900/80">
+                    <div>
+                        <h2 class="text-xl font-bold text-white">M-Pesa B2C Payouts & Financial Ledger</h2>
+                        <p class="text-xs text-slate-400 mt-0.5">Automated collector payouts, batch approvals, and printable disbursement receipts.</p>
+                    </div>
+                    <button onclick="openTriggerPayoutModal()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-lg shadow-emerald-600/30 transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-paper-plane"></i>
+                        <span>Trigger Direct B2C Payout</span>
+                    </button>
+                </div>
+
+                <div class="p-6 rounded-2xl fluent-card space-y-4">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-800/80 text-slate-400 font-semibold border-b border-slate-700/80">
+                                <tr>
+                                    <th class="p-3">M-Pesa Ref ID</th>
+                                    <th class="p-3">Beneficiary Collector</th>
+                                    <th class="p-3">Phone Number</th>
+                                    <th class="p-3">Payout Amount (KES)</th>
+                                    <th class="p-3">Batch Date</th>
+                                    <th class="p-3">Status</th>
+                                    <th class="p-3 text-right">Receipt</th>
+                                </tr>
+                            </thead>
+                            <tbody id="mpesaTableBody" class="divide-y divide-slate-800/80">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 5: MATERIAL SORTING HUBS & OFF-TAKERS -->
+            <section id="hubsTab" class="tab-content hidden space-y-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-2xl fluent-card bg-slate-900/80">
+                    <div>
+                        <h2 class="text-xl font-bold text-white">Material Sorting Hubs & Off-Taker Dispatch</h2>
+                        <p class="text-xs text-slate-400 mt-0.5">Track stock inventories at Nairobi, Nyeri, and Nakuru hubs and assign batches to off-takers.</p>
+                    </div>
+                    <button onclick="openAssignBatchModal()" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-lg shadow-blue-600/30 transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-truck-ramp-box"></i>
+                        <span>Assign Off-Taker Shipment</span>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="hubsList">
+                    <!-- Populated dynamically -->
+                </div>
+            </section>
+
+            <!-- TAB 6: DISPATCH & AUDIT TRAIL -->
+            <section id="auditTab" class="tab-content hidden space-y-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-2xl fluent-card bg-slate-900/80">
+                    <div>
+                        <h2 class="text-xl font-bold text-white">Email / SMS Dispatch & System Audit Trail</h2>
+                        <p class="text-xs text-slate-400 mt-0.5">Dispatch bulk investor updates or inspect automated system logs.</p>
+                    </div>
+                    <button onclick="openDispatchModal()" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-lg shadow-blue-600/30 transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-paper-plane"></i>
+                        <span>Dispatch Notice</span>
+                    </button>
+                </div>
+
+                <div class="p-6 rounded-2xl fluent-card space-y-4">
+                    <h3 class="text-sm font-bold text-white">System Security & Operation Logs</h3>
+                    <div class="space-y-2 text-xs font-mono" id="auditLogContainer">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    
+    <!-- Modal: Financial Editor -->
+    <div id="financialEditorModal" class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="w-full max-w-md bg-slate-900 border border-slate-700/80 rounded-2xl p-6 space-y-4 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h3 class="text-base font-bold text-white">Edit Company Financial Metrics</h3>
+                <button onclick="closeModal('financialEditorModal')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="block text-slate-400 mb-1">Total Gross Income (KES)</label>
+                    <input type="number" id="editIncomeInput" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white font-mono focus:border-blue-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-slate-400 mb-1">Total Operational Expenses (KES)</label>
+                    <input type="number" id="editExpensesInput" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white font-mono focus:border-blue-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-slate-400 mb-1">Total Tonnage Processed (TONS)</label>
+                    <input type="number" id="editTonnageInput" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white font-mono focus:border-blue-500 focus:outline-none">
+                </div>
+            </div>
+            <div class="flex items-center justify-end gap-2 pt-2">
+                <button onclick="closeModal('financialEditorModal')" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300">Cancel</button>
+                <button onclick="saveFinancialMetrics()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-xs font-semibold text-white">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Add Financial Line Item -->
+    <div id="addFinancialLineItemModal" class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="w-full max-w-md bg-slate-900 border border-slate-700/80 rounded-2xl p-6 space-y-4 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h3 class="text-base font-bold text-white">Add Financial Entry</h3>
+                <button onclick="closeModal('addFinancialLineItemModal')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="block text-slate-400 mb-1">Entry Type</label>
+                    <select id="lineItemType" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white">
+                        <option value="Income">Income (Revenue Stream)</option>
+                        <option value="Expense">Expense (Operational Cost)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-slate-400 mb-1">Description / Line Item Name</label>
+                    <input type="text" id="lineItemDesc" placeholder="e.g. Off-taker Sales - PETCO" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white focus:border-blue-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-slate-400 mb-1">Category</label>
+                    <input type="text" id="lineItemCategory" placeholder="e.g. Sales, Fuel, Payouts" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white focus:border-blue-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-slate-400 mb-1">Amount (KES)</label>
+                    <input type="number" id="lineItemAmount" placeholder="150000" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white focus:border-blue-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-slate-400 mb-1">Hub Allocation</label>
+                    <select id="lineItemHub" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white">
+                        <option value="Nairobi Central Hub">Nairobi Central Hub</option>
+                        <option value="Nyeri Sorting Plant">Nyeri Sorting Plant</option>
+                        <option value="Nakuru Recycling Depot">Nakuru Recycling Depot</option>
+                        <option value="Company-Wide">Company-Wide</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex items-center justify-end gap-2 pt-2">
+                <button onclick="closeModal('addFinancialLineItemModal')" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300">Cancel</button>
+                <button onclick="saveFinancialLineItem()" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-xs font-semibold text-white">Add Entry</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Schedule Pickup -->
+    <div id="pickupModal" class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="w-full max-w-md bg-slate-900 border border-slate-700/80 rounded-2xl p-6 space-y-4 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h3 class="text-base font-bold text-white" id="pickupModalTitle">Schedule New Waste Collection</h3>
+                <button onclick="closeModal('pickupModal')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="block text-slate-400 mb-1">Client / Site Name</label>
+                    <input type="text" id="pickupClient" placeholder="e.g. Garden City Mall" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white focus:border-blue-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-slate-400 mb-1">Hub Location</label>
+                    <select id="pickupHub" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white">
+                        <option value="Nairobi Hub">Nairobi Hub</option>
+                        <option value="Nyeri Hub">Nyeri Hub</option>
+                        <option value="Nakuru Hub">Nakuru Hub</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-slate-400 mb-1">Material Category</label>
+                    <select id="pickupMaterial" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white">
+                        <option value="PET Plastics">PET Plastics</option>
+                        <option value="HDPE Rigid Plastics">HDPE Rigid Plastics</option>
+                        <option value="Cardboard & Paper">Cardboard & Paper</option>
+                        <option value="Glass Flakes">Glass Flakes</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-slate-400 mb-1">Estimated Weight (Kg)</label>
+                    <input type="number" id="pickupWeight" placeholder="1200" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-white focus:border-blue-500 focus:outline-none">
+                </div>
+            </div>
+            <div class="flex items-center justify-end gap-2 pt-2">
+                <button onclick="closeModal('pickupModal')" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300">Cancel</button>
+                <button onclick="savePickup()" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-xs font-semibold text-white">Save Pickup</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden Area for Clean Printable Receipts/Reports -->
+    <div id="printableArea" class="hidden p-8 space-y-4 font-mono text-black">
+        <!-- Receipt template injected before printing -->
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <script>
+        // State variables
+        let currentTheme = 'dark';
+        let currentGraphTimeframe = 'ytd';
+
+        // Seed Data
+        let financialMetrics = {
+            totalIncome: 14850000,
+            totalExpenses: 8240000,
+            tonnage: 1842
+        };
+
+        let financialItems = [
+            { id: 1, category: 'Off-Taker Sales', desc: 'PET Flakes Sales to Mr. Green Africa', type: 'Income', amount: 8400000, hub: 'Nairobi Central Hub' },
+            { id: 2, category: 'Carbon Credits', desc: 'Verra Offset Credit Disbursement Q2', type: 'Income', amount: 4200000, hub: 'Company-Wide' },
+            { id: 3, category: 'Franchise Fees', desc: 'Nyeri & Nakuru Hub License Royalty', type: 'Income', amount: 2250000, hub: 'Company-Wide' },
+            { id: 4, category: 'Collector Payouts', desc: 'Direct M-Pesa B2C Automated Payments', type: 'Expense', amount: 4800000, hub: 'Nairobi Central Hub' },
+            { id: 5, category: 'Logistics & Fuel', desc: 'Truck Fleet Diesel & Servicing', type: 'Expense', amount: 1940000, hub: 'Company-Wide' },
+            { id: 6, category: 'Sorting Labor', desc: 'Hub Manual Sorter Wages & PPE', type: 'Expense', amount: 1500000, hub: 'Nyeri Sorting Plant' }
+        ];
+
+        let pickups = [
+            { id: 'PK-9082', client: 'Sarit Centre Mall', location: 'Westlands, Nairobi', material: 'PET Plastics', weight: 3400, status: 'Completed', date: '2026-10-01' },
+            { id: 'PK-9083', client: 'Two Rivers Complex', location: 'Ruaka, Nairobi', material: 'Cardboard & Paper', weight: 5100, status: 'In Progress', date: '2026-10-02' },
+            { id: 'PK-9084', client: 'Outspan Hotel Site', location: 'Nyeri Town', material: 'Glass Flakes', weight: 1800, status: 'Scheduled', date: '2026-10-03' },
+            { id: 'PK-9085', client: 'Hyrax Hill Supermarket', location: 'Nakuru CBD', material: 'HDPE Rigid Plastics', weight: 2600, status: 'Scheduled', date: '2026-10-04' }
+        ];
+
+        let tenants = [
+            { id: 1, name: 'Sarit Centre Green Hub', domain: 'sarit.circulink.co.ke', status: 'Active', tons: 420, users: 18 },
+            { id: 2, name: 'Two Rivers Sustainability Portal', domain: 'tworivers.circulink.co.ke', status: 'Active', tons: 610, users: 34 },
+            { id: 3, name: 'Nyeri Golf Club Eco Site', domain: 'nyerigolf.circulink.co.ke', status: 'Maintenance', tons: 110, users: 8 }
+        ];
+
+        let mpesaTransactions = [
+            { ref: 'QFH8910293', name: 'Juma Ochieng', phone: '+254 712 *** 890', amount: 14500, date: '2026-10-02 14:22', status: 'Successful' },
+            { ref: 'QFH8910294', name: 'Mary Wanjiku', phone: '+254 722 *** 112', amount: 8200, date: '2026-10-02 15:10', status: 'Successful' },
+            { ref: 'QFH8910295', name: 'Kipchumba Bett', phone: '+254 701 *** 455', amount: 21000, date: '2026-10-03 09:15', status: 'Pending Approval' }
+        ];
+
+        let hubs = [
+            { name: 'Nairobi Central Hub', location: 'Industrial Area, Nairobi', stock: '480 TONS', capacity: '85%' },
+            { name: 'Nyeri Sorting Plant', location: 'King' + "'" + 'ong' + "'" + 'o, Nyeri', stock: '190 TONS', capacity: '42%' },
+            { name: 'Nakuru Recycling Depot', location: 'Gioto Eco Zone, Nakuru', stock: '310 TONS', capacity: '60%' }
+        ];
+
+        let auditLogs = [
+            '[SYSTEM INFO] Master Admin logged in from IP 102.218.45.12 (Nairobi, Kenya)',
+            '[MPESA B2C] Batch payout #9082 executed successfully (Total: KSh 22,700)',
+            '[METRICS EDIT] Financial metrics updated by Executive Admin',
+            '[PICKUP] Status changed for PK-9082 -> Completed'
+        ];
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active', 'bg-blue-600/90', 'text-white', 'shadow-md');
+                btn.classList.add('text-slate-300');
+            });
+
+            document.getElementById(tabId).classList.remove('hidden');
+            const activeBtn = document.getElementById(`nav-${tabId}`);
+            if (activeBtn) {
+                activeBtn.classList.add('active', 'bg-blue-600/90', 'text-white', 'shadow-md');
+                activeBtn.classList.remove('text-slate-300');
+            }
+
+            if (tabId === 'investorTab') {
+                renderFinancialGraph();
+            }
+        }
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const icon = document.getElementById('themeIcon');
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                html.classList.add('light');
+                icon.className = 'fa-solid fa-sun text-amber-400';
+                currentTheme = 'light';
+            } else {
+                html.classList.remove('light');
+                html.classList.add('dark');
+                icon.className = 'fa-solid fa-moon text-slate-300';
+                currentTheme = 'dark';
+            }
+            renderFinancialGraph();
+        }
+
+        function updateFinancialCards() {
+            document.getElementById('cardTotalIncome').innerText = `KSh ${financialMetrics.totalIncome.toLocaleString()}`;
+            document.getElementById('cardTotalExpenses').innerText = `KSh ${financialMetrics.totalExpenses.toLocaleString()}`;
+            
+            const netProfit = financialMetrics.totalIncome - financialMetrics.totalExpenses;
+            document.getElementById('cardNetProfit').innerText = `KSh ${netProfit.toLocaleString()}`;
+            
+            const margin = financialMetrics.totalIncome > 0 ? ((netProfit / financialMetrics.totalIncome) * 100).toFixed(1) : '0';
+            document.getElementById('cardProfitMargin').innerText = `${margin}%`;
+            
+            document.getElementById('cardTotalTonnage').innerText = `${financialMetrics.tonnage.toLocaleString()} TONS`;
+            
+            renderFinancialTable();
+            renderFinancialGraph();
+        }
+
+        function openFinancialEditorModal() {
+            document.getElementById('editIncomeInput').value = financialMetrics.totalIncome;
+            document.getElementById('editExpensesInput').value = financialMetrics.totalExpenses;
+            document.getElementById('editTonnageInput').value = financialMetrics.tonnage;
+            document.getElementById('financialEditorModal').classList.remove('hidden');
+        }
+
+        function saveFinancialMetrics() {
+            const inc = parseFloat(document.getElementById('editIncomeInput').value) || 0;
+            const exp = parseFloat(document.getElementById('editExpensesInput').value) || 0;
+            const ton = parseFloat(document.getElementById('editTonnageInput').value) || 0;
+
+            financialMetrics.totalIncome = inc;
+            financialMetrics.totalExpenses = exp;
+            financialMetrics.tonnage = ton;
+
+            closeModal('financialEditorModal');
+            updateFinancialCards();
+            showToast('Financial metrics updated successfully!');
+            addAuditLog('[METRICS EDIT] Master Admin updated high-level company metrics.');
+        }
+
+        function renderFinancialTable() {
+            const tbody = document.getElementById('financialTableBody');
+            tbody.innerHTML = '';
+
+            financialItems.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-800/40 transition-colors';
+                tr.innerHTML = `
+                    <td class="p-3 text-slate-300 font-semibold">${item.category}</td>
+                    <td class="p-3 text-slate-200">${item.desc}</td>
+                    <td class="p-3">
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${item.type === 'Income' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-400 border border-rose-500/30'}">
+                            ${item.type}
+                        </span>
+                    </td>
+                    <td class="p-3 font-mono font-bold ${item.type === 'Income' ? 'text-emerald-400' : 'text-rose-400'}">
+                        KSh ${item.amount.toLocaleString()}
+                    </td>
+                    <td class="p-3 text-slate-400">${item.hub}</td>
+                    <td class="p-3 text-right">
+                        <button onclick="deleteFinancialItem(${item.id})" class="text-slate-400 hover:text-rose-400 transition-colors">
+                            <i class="fa-solid fa-trash text-xs"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function openAddFinancialLineItemModal() {
+            document.getElementById('addFinancialLineItemModal').classList.remove('hidden');
+        }
+
+        function saveFinancialLineItem() {
+            const type = document.getElementById('lineItemType').value;
+            const desc = document.getElementById('lineItemDesc').value;
+            const category = document.getElementById('lineItemCategory').value;
+            const amount = parseFloat(document.getElementById('lineItemAmount').value) || 0;
+            const hub = document.getElementById('lineItemHub').value;
+
+            if (!desc || amount <= 0) {
+                showToast('Please fill in valid line item details.', 'error');
+                return;
+            }
+
+            const newItem = {
+                id: Date.now(),
+                category: category || type,
+                desc: desc,
+                type: type,
+                amount: amount,
+                hub: hub
+            };
+
+            financialItems.push(newItem);
+
+            if (type === 'Income') {
+                financialMetrics.totalIncome += amount;
+            } else {
+                financialMetrics.totalExpenses += amount;
+            }
+
+            closeModal('addFinancialLineItemModal');
+            updateFinancialCards();
+            showToast('New financial entry added!');
+            addAuditLog(`[FINANCIAL ADD] Added line item: ${desc} (KSh ${amount})`);
+        }
+
+        function deleteFinancialItem(id) {
+            const idx = financialItems.findIndex(i => i.id === id);
+            if (idx !== -1) {
+                const item = financialItems[idx];
+                if (item.type === 'Income') financialMetrics.totalIncome -= item.amount;
+                else financialMetrics.totalExpenses -= item.amount;
+
+                financialItems.splice(idx, 1);
+                updateFinancialCards();
+                showToast('Line item removed');
+            }
+        }
+
+        function setGraphTimeframe(tf) {
+            currentGraphTimeframe = tf;
+            document.querySelectorAll('.tf-btn').forEach(btn => {
+                btn.classList.remove('active', 'bg-blue-600', 'text-white', 'font-semibold');
+                btn.classList.add('text-slate-400');
+            });
+            const activeBtn = document.getElementById(`tf-${tf}`);
+            if (activeBtn) {
+                activeBtn.classList.add('active', 'bg-blue-600', 'text-white', 'font-semibold');
+                activeBtn.classList.remove('text-slate-400');
+            }
+            renderFinancialGraph();
+        }
+
+        function renderFinancialGraph() {
+            const svg = document.getElementById('financialGraphSvg');
+            if (!svg) return;
+
+            const showInc = document.getElementById('chkIncome').checked;
+            const showExp = document.getElementById('chkExpenses').checked;
+            const showProf = document.getElementById('chkProfit').checked;
+
+            // Generate trend multipliers based on timeframe
+            let dataPointsCount = 6;
+            if (currentGraphTimeframe === '7d') dataPointsCount = 7;
+            if (currentGraphTimeframe === '30d') dataPointsCount = 10;
+            if (currentGraphTimeframe === 'ytd') dataPointsCount = 8;
+            if (currentGraphTimeframe === '1y') dataPointsCount = 12;
+
+            const baseInc = financialMetrics.totalIncome / dataPointsCount;
+            const baseExp = financialMetrics.totalExpenses / dataPointsCount;
+
+            const incomePoints = [];
+            const expensePoints = [];
+            const profitPoints = [];
+
+            for (let i = 0; i < dataPointsCount; i++) {
+                const inc = baseInc * (0.8 + Math.sin(i * 0.7) * 0.3 + (i * 0.05));
+                const exp = baseExp * (0.85 + Math.cos(i * 0.6) * 0.2);
+                const prof = inc - exp;
+
+                incomePoints.push(inc);
+                expensePoints.push(exp);
+                profitPoints.push(prof);
+            }
+
+            const maxVal = Math.max(...incomePoints, ...expensePoints) * 1.25 || 1;
+
+            const svgWidth = 800;
+            const svgHeight = 220;
+
+            const buildPath = (points) => {
+                return points.map((val, idx) => {
+                    const x = (idx / (dataPointsCount - 1)) * (svgWidth - 40) + 20;
+                    const y = svgHeight - 20 - ((val / maxVal) * (svgHeight - 40));
+                    return `${idx === 0 ? 'M' : 'L'} ${x} ${y}`;
+                }).join(' ');
+            };
+
+            let svgContent = `
+                <defs>
+                    <linearGradient id="gradInc" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stop-color="#10B981" stop-opacity="0.3"/>
+                        <stop offset="100%" stop-color="#10B981" stop-opacity="0.0"/>
+                    </linearGradient>
+                    <linearGradient id="gradExp" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stop-color="#F43F5E" stop-opacity="0.25"/>
+                        <stop offset="100%" stop-color="#F43F5E" stop-opacity="0.0"/>
+                    </linearGradient>
+                </defs>
+            `;
+
+            // Render SVG Grid Lines
+            for (let j = 0; j <= 4; j++) {
+                const yPos = (svgHeight - 40) * (j / 4) + 20;
+                svgContent += `<line x1="20" y1="${yPos}" x2="${svgWidth - 20}" y2="${yPos}" stroke="rgba(255,255,255,0.05)" stroke-dasharray="4 4"/>`;
+            }
+
+            if (showInc) {
+                const incPath = buildPath(incomePoints);
+                svgContent += `<path d="${incPath}" fill="none" stroke="#10B981" stroke-width="3" stroke-linecap="round"/>`;
+            }
+
+            if (showExp) {
+                const expPath = buildPath(expensePoints);
+                svgContent += `<path d="${expPath}" fill="none" stroke="#F43F5E" stroke-width="3" stroke-linecap="round"/>`;
+            }
+
+            if (showProf) {
+                const profPath = buildPath(profitPoints);
+                svgContent += `<path d="${profPath}" fill="none" stroke="#3B82F6" stroke-width="3" stroke-linecap="round" stroke-dasharray="2 2"/>`;
+            }
+
+            svg.innerHTML = svgContent;
+        }
+
+        function renderPickups() {
+            const tbody = document.getElementById('pickupsTableBody');
+            tbody.innerHTML = '';
+
+            pickups.forEach(p => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-800/40 transition-colors';
+                tr.innerHTML = `
+                    <td class="p-3 font-mono font-bold text-blue-400">${p.id}</td>
+                    <td class="p-3 text-slate-200 font-semibold">${p.client}</td>
+                    <td class="p-3 text-slate-400">${p.location} (${p.hub})</td>
+                    <td class="p-3 text-slate-300">${p.material}</td>
+                    <td class="p-3 font-mono text-slate-200">${p.weight} Kg</td>
+                    <td class="p-3">
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
+                            p.status === 'Completed' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
+                            p.status === 'In Progress' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
+                            'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                        }">
+                            ${p.status}
+                        </span>
+                    </td>
+                    <td class="p-3 text-right space-x-2">
+                        <button onclick="printPickupSlip('${p.id}')" class="text-slate-400 hover:text-white" title="Print Slip">
+                            <i class="fa-solid fa-print"></i>
+                        </button>
+                        <button onclick="togglePickupStatus('${p.id}')" class="text-slate-400 hover:text-emerald-400" title="Advance Status">
+                            <i class="fa-solid fa-rotate"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function openPickupModal() {
+            document.getElementById('pickupModal').classList.remove('hidden');
+        }
+
+        function savePickup() {
+            const client = document.getElementById('pickupClient').value;
+            const hub = document.getElementById('pickupHub').value;
+            const mat = document.getElementById('pickupMaterial').value;
+            const w = parseFloat(document.getElementById('pickupWeight').value) || 0;
+
+            if (!client || w <= 0) {
+                showToast('Please provide valid pickup info.', 'error');
+                return;
+            }
+
+            const newPickup = {
+                id: `PK-${Math.floor(1000 + Math.random() * 9000)}`,
+                client: client,
+                location: hub,
+                hub: hub,
+                material: mat,
+                weight: w,
+                status: 'Scheduled',
+                date: new Date().toISOString().split('T')[0]
+            };
+
+            pickups.unshift(newPickup);
+            closeModal('pickupModal');
+            renderPickups();
+            showToast('Pickup successfully scheduled!');
+            addAuditLog(`[PICKUP ADD] New collection scheduled: ${newPickup.id} for ${client}`);
+        }
+
+        function togglePickupStatus(id) {
+            const p = pickups.find(item => item.id === id);
+            if (p) {
+                if (p.status === 'Scheduled') p.status = 'In Progress';
+                else if (p.status === 'In Progress') p.status = 'Completed';
+                else p.status = 'Scheduled';
+
+                renderPickups();
+                showToast(`Status updated for ${p.id}`);
+            }
+        }
+
+        function printPickupSlip(id) {
+            const p = pickups.find(item => item.id === id);
+            if (!p) return;
+
+            const printArea = document.getElementById('printableArea');
+            printArea.innerHTML = `
+                <div style="border: 2px solid #000; padding: 20px; border-radius: 8px;">
+                    <h2>CIRCULINK - WASTE COLLECTION SLIP</h2>
+                    <hr/>
+                    <p><strong>Slip ID:</strong> ${p.id}</p>
+                    <p><strong>Date:</strong> ${p.date}</p>
+                    <p><strong>Client:</strong> ${p.client}</p>
+                    <p><strong>Hub Location:</strong> ${p.location}</p>
+                    <p><strong>Material Category:</strong> ${p.material}</p>
+                    <p><strong>Weight:</strong> ${p.weight} Kg</p>
+                    <p><strong>Current Status:</strong> ${p.status}</p>
+                    <br/><br/>
+                    <p>Driver Signature: _______________________</p>
+                    <p>Client Signature: _______________________</p>
+                </div>
+            `;
+            window.print();
+        }
+
+        function renderTenants() {
+            const grid = document.getElementById('tenantsGrid');
+            grid.innerHTML = '';
+
+            tenants.forEach(t => {
+                const card = document.createElement('div');
+                card.className = 'p-5 rounded-2xl fluent-card space-y-3';
+                card.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${t.status === 'Active' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'}">${t.status}</span>
+                        <i class="fa-solid fa-globe text-slate-400 text-sm"></i>
+                    </div>
+                    <h4 class="font-bold text-white text-sm">${t.name}</h4>
+                    <p class="text-xs text-blue-400 font-mono">${t.domain}</p>
+                    <div class="flex items-center justify-between text-xs text-slate-400 border-t border-slate-800 pt-3">
+                        <span>${t.tons} Tons Recycled</span>
+                        <span>${t.users} Subscribed Users</span>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function renderMpesa() {
+            const tbody = document.getElementById('mpesaTableBody');
+            tbody.innerHTML = '';
+
+            mpesaTransactions.forEach(m => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-800/40 transition-colors';
+                tr.innerHTML = `
+                    <td class="p-3 font-mono font-bold text-emerald-400">${m.ref}</td>
+                    <td class="p-3 text-slate-200 font-semibold">${m.name}</td>
+                    <td class="p-3 font-mono text-slate-400">${m.phone}</td>
+                    <td class="p-3 font-mono font-bold text-white">KSh ${m.amount.toLocaleString()}</td>
+                    <td class="p-3 text-slate-400">${m.date}</td>
+                    <td class="p-3">
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${m.status === 'Successful' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'}">${m.status}</span>
+                    </td>
+                    <td class="p-3 text-right">
+                        <button onclick="printMpesaReceipt('${m.ref}')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-file-invoice"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function printMpesaReceipt(ref) {
+            const m = mpesaTransactions.find(t => t.ref === ref);
+            if (!m) return;
+
+            const printArea = document.getElementById('printableArea');
+            printArea.innerHTML = `
+                <div style="border: 2px solid #000; padding: 20px; border-radius: 8px;">
+                    <h2>CIRCULINK - M-PESA DISBURSEMENT RECEIPT</h2>
+                    <hr/>
+                    <p><strong>Transaction Ref:</strong> ${m.ref}</p>
+                    <p><strong>Date/Time:</strong> ${m.date}</p>
+                    <p><strong>Beneficiary Collector:</strong> ${m.name}</p>
+                    <p><strong>Mobile Number:</strong> ${m.phone}</p>
+                    <p><strong>Payout Amount:</strong> KSh ${m.amount.toLocaleString()}</p>
+                    <p><strong>Status:</strong> ${m.status}</p>
+                </div>
+            `;
+            window.print();
+        }
+
+        function renderHubs() {
+            const container = document.getElementById('hubsList');
+            container.innerHTML = '';
+
+            hubs.forEach(h => {
+                const card = document.createElement('div');
+                card.className = 'p-5 rounded-2xl fluent-card space-y-3';
+                card.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <h4 class="font-bold text-white text-sm">${h.name}</h4>
+                        <span class="text-xs font-bold text-emerald-400">${h.capacity} Cap</span>
+                    </div>
+                    <p class="text-xs text-slate-400"><i class="fa-solid fa-location-dot mr-1"></i> ${h.location}</p>
+                    <div class="p-3 rounded-xl bg-slate-950/60 border border-slate-800 flex items-center justify-between">
+                        <span class="text-xs text-slate-400">Current Stock</span>
+                        <span class="text-sm font-bold font-mono text-amber-400">${h.stock}</span>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function renderAuditLogs() {
+            const container = document.getElementById('auditLogContainer');
+            container.innerHTML = auditLogs.map(log => `<div class="p-2 rounded bg-slate-950/60 border border-slate-800/80 text-slate-300">${log}</div>`).join('');
+        }
+
+        function addAuditLog(msg) {
+            auditLogs.unshift(`[${new Date().toLocaleTimeString()}] ${msg}`);
+            renderAuditLogs();
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        function showToast(msg, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `px-4 py-3 rounded-xl text-xs font-semibold text-white shadow-xl flex items-center gap-2 transition-all transform translate-y-2 opacity-0 ${
+                type === 'success' ? 'bg-emerald-600 border border-emerald-400/30' : 'bg-rose-600 border border-rose-400/30'
+            }`;
+            toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation'}"></i> ${msg}`;
+
+            const container = document.getElementById('toastContainer');
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Initialization
+        window.onload = function() {
+            updateFinancialCards();
+            renderPickups();
+            renderTenants();
+            renderMpesa();
+            renderHubs();
+            renderAuditLogs();
+        };
+    </script>
+</body>
+</html>

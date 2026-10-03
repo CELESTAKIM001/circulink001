@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CIRCULINK Dashboard - Schedule Pickup</title>
+  
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    :root {
+      --fluent-primary: #107c41;
+      --fluent-primary-dark: #0e6b37;
+      --fluent-secondary: #00796b;
+      --fluent-accent-blue: #0078d4;
+      --fluent-bg: #f3f3f3;
+      --fluent-card-bg: #ffffff;
+      --fluent-text-primary: #242424;
+      --fluent-text-secondary: #616161;
+      --fluent-shadow-depth-8: 0 3.2px 7.2px 0 rgba(0,0,0,0.132), 0 0.6px 1.8px 0 rgba(0,0,0,0.108);
+      --fluent-shadow-depth-16: 0 6.4px 14.4px 0 rgba(0,0,0,0.132), 0 1.2px 3.6px 0 rgba(0,0,0,0.108);
+      --fluent-shadow-depth-64: 0 25.6px 57.6px 0 rgba(0,0,0,0.22), 0 4.8px 14.4px 0 rgba(0,0,0,0.18);
+    }
+
+    body {
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #f8faf8;
+      color: var(--fluent-text-primary);
+      overflow-x: hidden;
+    }
+
+    /* Fluent Acrylic Backdrop */
+    .fluent-acrylic {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border-right: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .fluent-card {
+      background: var(--fluent-card-bg);
+      border-radius: 8px;
+      box-shadow: var(--fluent-shadow-depth-8);
+      border: 1px solid rgba(0, 0, 0, 0.06);
+      transition: all 0.2s cubic-bezier(0.1, 0.9, 0.2, 1);
+    }
+
+    .fluent-card:hover {
+      box-shadow: var(--fluent-shadow-depth-16);
+    }
+
+    .fluent-input {
+      border: 1px solid #d1d1d1;
+      border-bottom: 2px solid #616161;
+      border-radius: 4px;
+      background-color: #ffffff;
+      transition: all 0.2s ease;
+    }
+
+    .fluent-input:focus {
+      outline: none;
+      border-bottom-color: var(--fluent-primary);
+      box-shadow: 0 2px 4px rgba(16, 124, 65, 0.15);
+    }
+
+    .fluent-btn-primary {
+      background-color: var(--fluent-primary);
+      color: #ffffff;
+      border-radius: 4px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.12);
+    }
+
+    .fluent-btn-primary:hover {
+      background-color: var(--fluent-primary-dark);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.18);
+    }
+
+    .fluent-btn-secondary {
+      background-color: #f0f0f0;
+      color: var(--fluent-text-primary);
+      border: 1px solid #d1d1d1;
+      border-radius: 4px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .fluent-btn-secondary:hover {
+      background-color: #e5e5e5;
+    }
+
+    .category-chip {
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+
+    .category-chip.selected {
+      border-color: var(--fluent-primary);
+      background-color: rgba(16, 124, 65, 0.06);
+      box-shadow: 0 2px 6px rgba(16, 124, 65, 0.15);
+    }
+
+    /* Stepper Component Styles */
+    .stepper-item {
+      position: relative;
+    }
+
+    .stepper-item::after {
+      content: '';
+      position: absolute;
+      top: 14px;
+      left: 50%;
+      width: 100%;
+      height: 2px;
+      background-color: #e0e0e0;
+      z-index: 1;
+    }
+
+    .stepper-item:last-child::after {
+      display: none;
+    }
+
+    .stepper-item.completed::after, .stepper-item.active::after {
+      background-color: var(--fluent-primary);
+    }
+
+    .stepper-node {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background-color: #ffffff;
+      border: 2px solid #cccccc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      z-index: 2;
+      font-size: 11px;
+      font-weight: bold;
+      margin: 0 auto 6px;
+    }
+
+    .stepper-item.completed .stepper-node {
+      background-color: var(--fluent-primary);
+      border-color: var(--fluent-primary);
+      color: #ffffff;
+    }
+
+    .stepper-item.active .stepper-node {
+      border-color: var(--fluent-primary);
+      color: var(--fluent-primary);
+      box-shadow: 0 0 0 3px rgba(16, 124, 65, 0.2);
+    }
+
+    /* Sidebar Transition */
+    #sidebar {
+      transition: width 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
+    }
+
+    .sidebar-collapsed #sidebar {
+      width: 5rem;
+    }
+
+    .sidebar-collapsed .nav-text, 
+    .sidebar-collapsed .brand-title,
+    .sidebar-collapsed .user-details {
+      display: none;
+    }
+
+    .sidebar-collapsed .nav-item {
+      justify-content: center;
+      padding-left: 0;
+      padding-right: 0;
+    }
+
+    /* Modal Backdrop Blur */
+    .modal-backdrop {
+      background-color: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(5px);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col md:flex-row">
+
+  <!-- Sidebar -->
+  <aside id="sidebar" class="w-64 fluent-acrylic fixed md:sticky top-0 h-screen z-40 flex flex-col justify-between shrink-0 shadow-lg md:shadow-none">
+    
+    <!-- Top Brand Header -->
+    <div>
+      <div class="h-16 px-5 flex items-center justify-between border-b border-gray-200/60">
+        <a href="#" class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-lg bg-emerald-700 flex items-center justify-center text-white shadow">
+            <i class="fa-solid fa-arrows-spin text-lg"></i>
+          </div>
+          <div class="brand-title">
+            <span class="text-base font-bold tracking-tight text-gray-900 block leading-tight">CIRCULINK</span>
+            <span class="text-[10px] font-bold text-emerald-700 tracking-wider">TUNA TAKA TAKA</span>
+          </div>
+        </a>
+        <button onclick="toggleSidebar()" class="text-gray-500 hover:text-gray-800 p-1.5 rounded-md hover:bg-gray-100 hidden md:block">
+          <i class="fa-solid fa-bars-staggered"></i>
+        </button>
+      </div>
+
+      <!-- Navigation Links -->
+      <nav class="p-3 space-y-1 text-sm font-medium">
+        <a href="#overview" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-md text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors">
+          <i class="fa-solid fa-chart-pie w-5 text-center text-gray-500"></i>
+          <span class="nav-text">Dashboard</span>
+        </a>
+        <a href="#schedule-section" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-md text-emerald-800 bg-emerald-50/80 font-semibold border-l-4 border-emerald-700">
+          <i class="fa-solid fa-calendar-plus w-5 text-center text-emerald-700"></i>
+          <span class="nav-text">Schedule Pickup</span>
+        </a>
+        <a href="#pickups-section" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-md text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors">
+          <i class="fa-solid fa-truck-ramp-box w-5 text-center text-gray-500"></i>
+          <span class="nav-text">My Pickups</span>
+          <span class="ml-auto bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full nav-text" id="sidebarPendingBadge">2</span>
+        </a>
+        <a href="#rewards" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-md text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors">
+          <i class="fa-solid fa-wallet w-5 text-center text-gray-500"></i>
+          <span class="nav-text">Earnings &amp; Points</span>
+        </a>
+        <a href="#impact" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-md text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors">
+          <i class="fa-solid fa-leaf w-5 text-center text-gray-500"></i>
+          <span class="nav-text">Eco Impact</span>
+        </a>
+        <a href="#settings" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-md text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors">
+          <i class="fa-solid fa-gear w-5 text-center text-gray-500"></i>
+          <span class="nav-text">Settings</span>
+        </a>
+      </nav>
+    </div>
+
+    <!-- Bottom User Profile Summary -->
+    <div class="p-3 border-t border-gray-200/60">
+      <div class="flex items-center gap-3 p-2 rounded-lg bg-gray-50/80">
+        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" alt="Jane Doe" class="w-9 h-9 rounded-full object-cover border border-emerald-600">
+        <div class="user-details overflow-hidden">
+          <div class="text-xs font-bold text-gray-900 truncate">Jane Doe</div>
+          <div class="text-[10px] text-emerald-700 font-semibold flex items-center gap-1">
+            <i class="fa-solid fa-award"></i> Green Champion
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="flex-1 min-w-0 p-4 sm:p-6 lg:p-8 space-y-8">
+
+    <!-- Header Bar -->
+    <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gray-200">
+      <div>
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Schedule Waste Pickup</h1>
+        <p class="text-xs sm:text-sm text-gray-500 mt-1">Book a verified youth collector, estimate your cash earnings, and turn waste into cash.</p>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <div class="relative">
+          <button class="w-10 h-10 rounded-full bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 flex items-center justify-center relative shadow-sm">
+            <i class="fa-regular fa-bell"></i>
+            <span class="absolute top-1 right-1 w-2.5 h-2.5 bg-emerald-600 rounded-full border-2 border-white"></span>
+          </button>
+        </div>
+        <button onclick="scrollToSchedule()" class="fluent-btn-primary px-4 py-2 text-xs sm:text-sm flex items-center gap-2">
+          <i class="fa-solid fa-plus"></i> New Schedule
+        </button>
+      </div>
+    </header>
+
+    <!-- Overview Stats Cards -->
+    <section id="overview" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+      
+      <!-- Stat 1 -->
+      <div class="fluent-card p-5 relative overflow-hidden">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Total Recycled</span>
+          <span class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-700 flex items-center justify-center text-sm">
+            <i class="fa-solid fa-scale-balanced"></i>
+          </span>
+        </div>
+        <div class="mt-3 flex items-baseline gap-2">
+          <span class="text-2xl sm:text-3xl font-bold text-gray-900" id="statTotalRecycled">145.5</span>
+          <span class="text-xs font-semibold text-gray-500">kg</span>
+        </div>
+        <div class="mt-2 text-xs text-emerald-700 font-medium flex items-center gap-1">
+          <i class="fa-solid fa-arrow-trend-up"></i> +12.4 kg this month
+        </div>
+      </div>
+
+      <!-- Stat 2 -->
+      <div class="fluent-card p-5 relative overflow-hidden">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Pending Pickups</span>
+          <span class="w-8 h-8 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center text-sm">
+            <i class="fa-solid fa-clock"></i>
+          </span>
+        </div>
+        <div class="mt-3 flex items-baseline gap-2">
+          <span class="text-2xl sm:text-3xl font-bold text-gray-900" id="statPendingCount">2</span>
+          <span class="text-xs font-semibold text-gray-500">Scheduled</span>
+        </div>
+        <div class="mt-2 text-xs text-amber-600 font-medium flex items-center gap-1">
+          <i class="fa-solid fa-truck-fast"></i> Next: Today, 2:00 PM
+        </div>
+      </div>
+
+      <!-- Stat 3 -->
+      <div class="fluent-card p-5 relative overflow-hidden">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Earnings / Points</span>
+          <span class="w-8 h-8 rounded-full bg-teal-50 text-teal-700 flex items-center justify-center text-sm">
+            <i class="fa-solid fa-wallet"></i>
+          </span>
+        </div>
+        <div class="mt-3 flex items-baseline gap-2">
+          <span class="text-2xl sm:text-3xl font-bold text-gray-900" id="statEarnings">4,120</span>
+          <span class="text-xs font-semibold text-gray-500">KSh</span>
+        </div>
+        <div class="mt-2 text-xs text-teal-700 font-medium flex items-center gap-1">
+          <i class="fa-solid fa-coins"></i> 380 Eco-Points earned
+        </div>
+      </div>
+
+      <!-- Stat 4 -->
+      <div class="fluent-card p-5 relative overflow-hidden">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">CO₂ Avoided</span>
+          <span class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-sm">
+            <i class="fa-solid fa-cloud-sun"></i>
+          </span>
+        </div>
+        <div class="mt-3 flex items-baseline gap-2">
+          <span class="text-2xl sm:text-3xl font-bold text-gray-900">312.8</span>
+          <span class="text-xs font-semibold text-gray-500">kg CO₂e</span>
+        </div>
+        <div class="mt-2 text-xs text-blue-600 font-medium flex items-center gap-1">
+          <i class="fa-solid fa-tree"></i> Equivalent to 14 trees
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Interactive Pickup Scheduler -->
+    <section id="schedule-section" class="fluent-card p-6 sm:p-8 bg-white border border-emerald-100/80">
+      
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-gray-200">
+        <div>
+          <h2 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+            <i class="fa-solid fa-calendar-check text-emerald-700"></i> Book a Pickup
+          </h2>
+          <p class="text-xs text-gray-500">Select waste categories, pickup location, and preferred timeframe.</p>
+        </div>
+
+        <!-- Wizard Step Indicators -->
+        <div class="flex items-center gap-2 text-xs font-semibold">
+          <span id="stepBadge1" class="px-2.5 py-1 rounded-full bg-emerald-700 text-white">1. Waste</span>
+          <i class="fa-solid fa-chevron-right text-[10px] text-gray-300"></i>
+          <span id="stepBadge2" class="px-2.5 py-1 rounded-full bg-gray-100 text-gray-500">2. Address</span>
+          <i class="fa-solid fa-chevron-right text-[10px] text-gray-300"></i>
+          <span id="stepBadge3" class="px-2.5 py-1 rounded-full bg-gray-100 text-gray-500">3. Time Slot</span>
+          <i class="fa-solid fa-chevron-right text-[10px] text-gray-300"></i>
+          <span id="stepBadge4" class="px-2.5 py-1 rounded-full bg-gray-100 text-gray-500">4. Confirm</span>
+        </div>
+      </div>
+
+      <form id="scheduleForm" onsubmit="handleFormSubmission(event)" class="mt-6 space-y-8">
+        
+        <!-- STEP 1: Waste Type Selector -->
+        <div id="wizardStep1" class="space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-bold uppercase tracking-wider text-gray-700">Step 1: Select Waste Category &amp; Estimate Weight</h3>
+            <span class="text-xs text-emerald-700 font-semibold">Select all that apply</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+            
+            <!-- Plastics -->
+            <div id="chip-plastics" onclick="toggleWasteCategory('plastics', 28)" class="category-chip selected p-3.5 flex flex-col justify-between h-32 relative">
+              <div class="flex justify-between items-start">
+                <div class="w-8 h-8 rounded bg-blue-50 text-blue-600 flex items-center justify-center text-sm">
+                  <i class="fa-solid fa-bottle-water"></i>
+                </div>
+                <input type="checkbox" checked id="chk-plastics" class="accent-emerald-700" onclick="event.stopPropagation(); updateCalculation();">
+              </div>
+              <div>
+                <div class="font-bold text-xs text-gray-900">Plastics (PET / Rigid)</div>
+                <div class="text-[11px] text-emerald-700 font-semibold">28 KSh / kg</div>
+              </div>
+            </div>
+
+            <!-- Organic Waste -->
+            <div id="chip-organic" onclick="toggleWasteCategory('organic', 12)" class="category-chip p-3.5 flex flex-col justify-between h-32 relative">
+              <div class="flex justify-between items-start">
+                <div class="w-8 h-8 rounded bg-amber-50 text-amber-600 flex items-center justify-center text-sm">
+                  <i class="fa-solid fa-apple-whole"></i>
+                </div>
+                <input type="checkbox" id="chk-organic" class="accent-emerald-700" onclick="event.stopPropagation(); updateCalculation();">
+              </div>
+              <div>
+                <div class="font-bold text-xs text-gray-900">Organic / Food Waste</div>
+                <div class="text-[11px] text-emerald-700 font-semibold">12 KSh / kg</div>
+              </div>
+            </div>
+
+            <!-- Glass Bottles -->
+            <div id="chip-glass" onclick="toggleWasteCategory('glass', 18)" class="category-chip p-3.5 flex flex-col justify-between h-32 relative">
+              <div class="flex justify-between items-start">
+                <div class="w-8 h-8 rounded bg-purple-50 text-purple-600 flex items-center justify-center text-sm">
+                  <i class="fa-solid fa-glass-water"></i>
+                </div>
+                <input type="checkbox" id="chk-glass" class="accent-emerald-700" onclick="event.stopPropagation(); updateCalculation();">
+              </div>
+              <div>
+                <div class="font-bold text-xs text-gray-900">Glass &amp; Bottles</div>
+                <div class="text-[11px] text-emerald-700 font-semibold">18 KSh / kg</div>
+              </div>
+            </div>
+
+            <!-- Paper / Cardboard -->
+            <div id="chip-paper" onclick="toggleWasteCategory('paper', 15)" class="category-chip p-3.5 flex flex-col justify-between h-32 relative">
+              <div class="flex justify-between items-start">
+                <div class="w-8 h-8 rounded bg-teal-50 text-teal-600 flex items-center justify-center text-sm">
+                  <i class="fa-solid fa-box-archive"></i>
+                </div>
+                <input type="checkbox" id="chk-paper" class="accent-emerald-700" onclick="event.stopPropagation(); updateCalculation();">
+              </div>
+              <div>
+                <div class="font-bold text-xs text-gray-900">Paper &amp; Cardboard</div>
+                <div class="text-[11px] text-emerald-700 font-semibold">15 KSh / kg</div>
+              </div>
+            </div>
+
+            <!-- E-Waste -->
+            <div id="chip-ewaste" onclick="toggleWasteCategory('ewaste', 150)" class="category-chip p-3.5 flex flex-col justify-between h-32 relative">
+              <div class="flex justify-between items-start">
+                <div class="w-8 h-8 rounded bg-red-50 text-red-600 flex items-center justify-center text-sm">
+                  <i class="fa-solid fa-laptop"></i>
+                </div>
+                <input type="checkbox" id="chk-ewaste" class="accent-emerald-700" onclick="event.stopPropagation(); updateCalculation();">
+              </div>
+              <div>
+                <div class="font-bold text-xs text-gray-900">E-Waste / Electronics</div>
+                <div class="text-[11px] text-emerald-700 font-semibold">150 KSh / kg</div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Quantity Inputs Grid -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-2">
+            <div>
+              <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Estimated Total Weight (kg)</label>
+              <div class="flex items-center gap-2">
+                <button type="button" onclick="adjustWeight(-5)" class="w-10 h-10 fluent-btn-secondary flex items-center justify-center text-lg">-</button>
+                <input type="number" id="inputWeight" min="1" value="15" oninput="updateCalculation()" class="w-full p-2.5 fluent-input text-center font-bold text-sm">
+                <button type="button" onclick="adjustWeight(5)" class="w-10 h-10 fluent-btn-secondary flex items-center justify-center text-lg">+</button>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Number of Bags / Containers</label>
+              <select id="bagCount" class="w-full p-2.5 fluent-input text-sm">
+                <option>1 - 2 Standard Bags</option>
+                <option selected>3 - 5 Standard Bags</option>
+                <option>6 - 10 Heavy Duty Sacks</option>
+                <option>Bulk Commercial Load (>10 Sacks)</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Material Quality</label>
+              <select id="wasteQuality" onchange="updateCalculation()" class="w-full p-2.5 fluent-input text-sm">
+                <option value="1.0">Clean &amp; Pre-Sorted (100% Rate)</option>
+                <option value="0.85">Semi-Sorted / Mixed (85% Rate)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 2: Address & Location Picker -->
+        <div id="wizardStep2" class="space-y-4 pt-4 border-t border-gray-100">
+          <h3 class="text-sm font-bold uppercase tracking-wider text-gray-700">Step 2: Pickup Location &amp; Address</h3>
+          
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            
+            <label class="fluent-card p-4 flex items-start gap-3 cursor-pointer border-2 border-emerald-700 bg-emerald-50/30">
+              <input type="radio" name="addressPreset" checked class="mt-1 accent-emerald-700">
+              <div>
+                <div class="text-xs font-bold text-gray-900">Home Preset</div>
+                <div class="text-xs text-gray-600 mt-0.5">House 14B, Kimathi Estate, Nyeri</div>
+                <div class="text-[10px] text-emerald-700 font-semibold mt-1">County: Nyeri</div>
+              </div>
+            </label>
+
+            <label class="fluent-card p-4 flex items-start gap-3 cursor-pointer hover:border-gray-300">
+              <input type="radio" name="addressPreset" class="mt-1 accent-emerald-700">
+              <div>
+                <div class="text-xs font-bold text-gray-900">Business Premises</div>
+                <div class="text-xs text-gray-600 mt-0.5">Shop 4, Commercial Plaza, Nairobi</div>
+                <div class="text-[10px] text-gray-500 mt-1">County: Nairobi City</div>
+              </div>
+            </label>
+
+            <label class="fluent-card p-4 flex items-start gap-3 cursor-pointer hover:border-gray-300">
+              <input type="radio" name="addressPreset" class="mt-1 accent-emerald-700">
+              <div>
+                <div class="text-xs font-bold text-gray-900">+ Add Custom Pin</div>
+                <div class="text-xs text-gray-600 mt-0.5">Select custom GPS location on map</div>
+                <div class="text-[10px] text-emerald-700 font-semibold mt-1">Geospatial Routing</div>
+              </div>
+            </label>
+
+          </div>
+
+          <!-- Map Simulation Container -->
+          <div class="relative w-full h-36 bg-slate-100 rounded-lg overflow-hidden border border-gray-200 flex items-center justify-center">
+            <div class="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:16px_16px] opacity-60"></div>
+            <div class="relative z-10 text-center space-y-1">
+              <div class="w-8 h-8 bg-emerald-700 text-white rounded-full flex items-center justify-center mx-auto shadow-md animate-bounce">
+                <i class="fa-solid fa-location-dot"></i>
+              </div>
+              <span class="text-xs font-semibold text-gray-700 bg-white/90 px-3 py-1 rounded-full shadow-sm">
+                Pinned: Kimathi Estate, Section 2 (GPS: -0.4201, 36.9475)
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 3: Date & Time Slot Selection -->
+        <div id="wizardStep3" class="space-y-4 pt-4 border-t border-gray-100">
+          <h3 class="text-sm font-bold uppercase tracking-wider text-gray-700">Step 3: Preferred Date &amp; Pickup Window</h3>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Select Pickup Date</label>
+              <input type="date" id="pickupDate" required class="w-full p-2.5 fluent-input text-sm">
+            </div>
+
+            <div class="sm:col-span-3">
+              <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Available Time Window</label>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <label class="fluent-card p-3 flex items-center gap-2 cursor-pointer border border-emerald-700 bg-emerald-50/40">
+                  <input type="radio" name="timeSlot" value="Morning (8:00 AM - 11:30 AM)" checked class="accent-emerald-700">
+                  <div>
+                    <div class="text-xs font-bold text-gray-900">Morning</div>
+                    <div class="text-[10px] text-gray-500">8:00 AM - 11:30 AM</div>
+                  </div>
+                </label>
+
+                <label class="fluent-card p-3 flex items-center gap-2 cursor-pointer hover:border-gray-300">
+                  <input type="radio" name="timeSlot" value="Afternoon (12:00 PM - 3:30 PM)" class="accent-emerald-700">
+                  <div>
+                    <div class="text-xs font-bold text-gray-900">Afternoon</div>
+                    <div class="text-[10px] text-gray-500">12:00 PM - 3:30 PM</div>
+                  </div>
+                </label>
+
+                <label class="fluent-card p-3 flex items-center gap-2 cursor-pointer hover:border-gray-300">
+                  <input type="radio" name="timeSlot" value="Late Express (4:00 PM - 6:00 PM)" class="accent-emerald-700">
+                  <div>
+                    <div class="text-xs font-bold text-gray-900">Late Express</div>
+                    <div class="text-[10px] text-gray-500">4:00 PM - 6:00 PM</div>
+                  </div>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 4: Special Instructions & Photo Upload -->
+        <div id="wizardStep4" class="space-y-4 pt-4 border-t border-gray-100">
+          <h3 class="text-sm font-bold uppercase tracking-wider text-gray-700">Step 4: Collector Instructions &amp; Photo Preview</h3>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Special Notes for Collector</label>
+              <textarea id="pickupNotes" rows="3" placeholder="e.g. Bags placed near gate, gate code #1234..." class="w-full p-2.5 fluent-input text-sm"></textarea>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Photo Preview (Optional)</label>
+              <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-emerald-600 transition-colors cursor-pointer bg-gray-50/50">
+                <i class="fa-solid fa-cloud-arrow-up text-gray-400 text-2xl mb-1"></i>
+                <div class="text-xs text-gray-600 font-semibold">Click to upload photo of waste bags</div>
+                <div class="text-[10px] text-gray-400 mt-0.5">JPG, PNG up to 5MB</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Incentive Summary Banner -->
+        <div class="p-5 rounded-lg bg-gradient-to-r from-emerald-800 to-teal-800 text-white shadow-lg flex flex-col md:flex-row items-center justify-between gap-4">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-xl shrink-0">
+              <i class="fa-solid fa-coins text-amber-300"></i>
+            </div>
+            <div>
+              <span class="text-xs uppercase tracking-wider font-semibold text-emerald-200">Estimated Instant Incentive</span>
+              <div class="flex items-baseline gap-3">
+                <span id="calculatedCash" class="text-3xl font-bold">420.00 KSh</span>
+                <span id="calculatedPoints" class="text-xs text-teal-200 font-semibold">+42 Eco-Points</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="w-full md:w-auto text-right">
+            <button type="submit" class="fluent-btn-primary bg-amber-400 hover:bg-amber-500 text-gray-900 font-bold px-8 py-3.5 text-sm w-full md:w-auto shadow-md">
+              <i class="fa-solid fa-check-circle mr-2"></i> Confirm &amp; Schedule Pickup
+            </button>
+          </div>
+        </div>
+
+      </form>
+    </section>
+
+    <!-- Active & Past Pickups Dashboard Section -->
+    <section id="pickups-section" class="fluent-card p-6 sm:p-8 bg-white">
+      
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-gray-200">
+        <div>
+          <h2 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+            <i class="fa-solid fa-list-check text-emerald-700"></i> My Pickup History &amp; Status
+          </h2>
+          <p class="text-xs text-gray-500">Track assigned youth collectors and view historical waste receipts.</p>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="flex bg-gray-100 p-1 rounded-lg text-xs font-semibold">
+          <button onclick="filterPickups('all')" id="tabAll" class="px-3 py-1.5 rounded-md bg-white text-gray-900 shadow-sm">All</button>
+          <button onclick="filterPickups('upcoming')" id="tabUpcoming" class="px-3 py-1.5 rounded-md text-gray-600 hover:text-gray-900">Upcoming</button>
+          <button onclick="filterPickups('completed')" id="tabCompleted" class="px-3 py-1.5 rounded-md text-gray-600 hover:text-gray-900">Completed</button>
+        </div>
+      </div>
+
+      <!-- Live Stepper Demo Card for Nearest Upcoming Pickup -->
+      <div class="mt-6 p-5 rounded-lg bg-emerald-50/50 border border-emerald-200 space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-700 text-white">LIVE TRACKER</span>
+            <span class="text-xs font-bold text-gray-900">Booking #CLK-9842</span>
+            <span class="text-xs text-gray-500">• Plastic &amp; Glass (12 kg)</span>
+          </div>
+          <span class="text-xs font-semibold text-emerald-800">Assigned Collector: <strong class="text-gray-900">Kevin Mutua (Nyeri Youth Sacco)</strong></span>
+        </div>
+
+        <!-- Status Stepper Bar -->
+        <div class="grid grid-cols-5 text-center pt-2">
+          <div class="stepper-item completed">
+            <div class="stepper-node"><i class="fa-solid fa-check"></i></div>
+            <div class="text-[11px] font-bold text-gray-800">Scheduled</div>
+            <div class="text-[9px] text-gray-400">09:30 AM</div>
+          </div>
+          <div class="stepper-item completed">
+            <div class="stepper-node"><i class="fa-solid fa-check"></i></div>
+            <div class="text-[11px] font-bold text-gray-800">Collector Assigned</div>
+            <div class="text-[9px] text-gray-400">10:15 AM</div>
+          </div>
+          <div class="stepper-item active">
+            <div class="stepper-node"><i class="fa-solid fa-truck-moving"></i></div>
+            <div class="text-[11px] font-bold text-emerald-800">En Route</div>
+            <div class="text-[9px] text-emerald-700 font-semibold">ETA: 20 Mins</div>
+          </div>
+          <div class="stepper-item">
+            <div class="stepper-node">4</div>
+            <div class="text-[11px] font-medium text-gray-500">Collected</div>
+            <div class="text-[9px] text-gray-400">Pending</div>
+          </div>
+          <div class="stepper-item">
+            <div class="stepper-node">5</div>
+            <div class="text-[11px] font-medium text-gray-500">Paid</div>
+            <div class="text-[9px] text-gray-400">Pending</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pickups Data Table -->
+      <div class="mt-6 overflow-x-auto">
+        <table class="w-full text-left text-xs border-collapse">
+          <thead>
+            <tr class="border-b border-gray-200 text-gray-500 uppercase tracking-wider font-bold">
+              <th class="py-3 px-3">Booking ID</th>
+              <th class="py-3 px-3">Categories</th>
+              <th class="py-3 px-3">Date &amp; Time</th>
+              <th class="py-3 px-3">Est. Weight</th>
+              <th class="py-3 px-3">Est. Payout</th>
+              <th class="py-3 px-3">Status</th>
+              <th class="py-3 px-3 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="pickupsTableBody" class="divide-y divide-gray-100 font-medium">
+            <!-- Row 1 -->
+            <tr class="hover:bg-gray-50/80 transition-colors">
+              <td class="py-3.5 px-3 font-bold text-gray-900">CLK-9842</td>
+              <td class="py-3.5 px-3">Plastics, Glass</td>
+              <td class="py-3.5 px-3 text-gray-600">Today, 2:00 PM</td>
+              <td class="py-3.5 px-3">12.0 kg</td>
+              <td class="py-3.5 px-3 font-bold text-emerald-700">336 KSh</td>
+              <td class="py-3.5 px-3">
+                <span class="px-2 py-1 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">En Route</span>
+              </td>
+              <td class="py-3.5 px-3 text-right space-x-2">
+                <button onclick="viewPickupDetails('CLK-9842')" class="text-emerald-700 hover:underline">Details</button>
+                <button onclick="reschedulePickup('CLK-9842')" class="text-gray-500 hover:text-gray-900">Reschedule</button>
+              </td>
+            </tr>
+
+            <!-- Row 2 -->
+            <tr class="hover:bg-gray-50/80 transition-colors">
+              <td class="py-3.5 px-3 font-bold text-gray-900">CLK-9810</td>
+              <td class="py-3.5 px-3">Organic Waste</td>
+              <td class="py-3.5 px-3 text-gray-600">Oct 05, 2026</td>
+              <td class="py-3.5 px-3">25.0 kg</td>
+              <td class="py-3.5 px-3 font-bold text-emerald-700">300 KSh</td>
+              <td class="py-3.5 px-3">
+                <span class="px-2 py-1 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800">Scheduled</span>
+              </td>
+              <td class="py-3.5 px-3 text-right space-x-2">
+                <button onclick="viewPickupDetails('CLK-9810')" class="text-emerald-700 hover:underline">Details</button>
+                <button onclick="cancelPickup('CLK-9810')" class="text-red-600 hover:underline">Cancel</button>
+              </td>
+            </tr>
+
+            <!-- Row 3 -->
+            <tr class="hover:bg-gray-50/80 transition-colors">
+              <td class="py-3.5 px-3 font-bold text-gray-900">CLK-9722</td>
+              <td class="py-3.5 px-3">E-Waste, Paper</td>
+              <td class="py-3.5 px-3 text-gray-600">Sep 28, 2026</td>
+              <td class="py-3.5 px-3">8.5 kg</td>
+              <td class="py-3.5 px-3 font-bold text-emerald-700">1,275 KSh</td>
+              <td class="py-3.5 px-3">
+                <span class="px-2 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">Completed &amp; Paid</span>
+              </td>
+              <td class="py-3.5 px-3 text-right">
+                <button onclick="downloadReceipt('CLK-9722')" class="text-emerald-700 hover:underline"><i class="fa-solid fa-download mr-1"></i> Receipt</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Booking Confirmation Modal -->
+  <div id="bookingModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 modal-backdrop">
+    <div class="fluent-card w-full max-w-md p-6 relative bg-white shadow-2xl space-y-4">
+      
+      <button onclick="closeModal('bookingModal')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-lg">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <div class="w-12 h-12 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-2xl mx-auto">
+        <i class="fa-solid fa-circle-check"></i>
+      </div>
+
+      <div class="text-center">
+        <h3 class="text-lg font-bold text-gray-900">Pickup Scheduled!</h3>
+        <p class="text-xs text-gray-500 mt-0.5">Your booking has been registered in the Circulink network.</p>
+      </div>
+
+      <div class="p-4 rounded-lg bg-gray-50 text-xs space-y-2 border border-gray-100">
+        <div class="flex justify-between"><span class="text-gray-500">Booking ID:</span> <strong id="modalBookingId" class="text-gray-900">CLK-9890</strong></div>
+        <div class="flex justify-between"><span class="text-gray-500">Date &amp; Window:</span> <strong id="modalDate" class="text-gray-900">Tomorrow, Morning Window</strong></div>
+        <div class="flex justify-between"><span class="text-gray-500">Est. Payout:</span> <strong id="modalPayout" class="text-emerald-700 font-bold">420 KSh</strong></div>
+        <div class="flex justify-between"><span class="text-gray-500">Assigned Collector:</span> <strong class="text-gray-900">Auto-dispatching...</strong></div>
+      </div>
+
+      <div class="flex gap-2 pt-2">
+        <button onclick="closeModal('bookingModal')" class="fluent-btn-secondary flex-1 py-2 text-xs">Close</button>
+        <button onclick="scrollToPickups()" class="fluent-btn-primary flex-1 py-2 text-xs">View Trackers</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Fluent Toast Notification Container -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 hidden p-4 rounded-lg bg-gray-900 text-white text-xs font-semibold shadow-2xl flex items-center gap-3 transition-all duration-300 transform translate-y-2">
+    <i class="fa-solid fa-bell text-emerald-400 text-base"></i>
+    <span id="toastMsg">Action completed successfully.</span>
+  </div>
+
+  <script>
+    // State Variables
+    let selectedCategories = {
+      plastics: { active: true, rate: 28 },
+      organic: { active: false, rate: 12 },
+      glass: { active: false, rate: 18 },
+      paper: { active: false, rate: 15 },
+      ewaste: { active: false, rate: 150 }
+    };
+
+    let pickupsList = [
+      { id: 'CLK-9842', categories: 'Plastics, Glass', date: 'Today, 2:00 PM', weight: '12.0 kg', payout: '336 KSh', status: 'En Route', type: 'upcoming' },
+      { id: 'CLK-9810', categories: 'Organic Waste', date: 'Oct 05, 2026', weight: '25.0 kg', payout: '300 KSh', status: 'Scheduled', type: 'upcoming' },
+      { id: 'CLK-9722', categories: 'E-Waste, Paper', date: 'Sep 28, 2026', weight: '8.5 kg', payout: '1,275 KSh', status: 'Completed & Paid', type: 'completed' }
+    ];
+
+    // Sidebar Toggle Logic
+    function toggleSidebar() {
+      document.body.classList.toggle('sidebar-collapsed');
+    }
+
+    // Waste Category Toggle
+    function toggleWasteCategory(catKey, rate) {
+      const chip = document.getElementById(`chip-${catKey}`);
+      const chk = document.getElementById(`chk-${catKey}`);
+      
+      selectedCategories[catKey].active = !selectedCategories[catKey].active;
+      chk.checked = selectedCategories[catKey].active;
+
+      if (selectedCategories[catKey].active) {
+        chip.classList.add('selected');
+      } else {
+        chip.classList.remove('selected');
+      }
+
+      updateCalculation();
+    }
+
+    // Weight Adjustment
+    function adjustWeight(delta) {
+      const input = document.getElementById('inputWeight');
+      let current = parseFloat(input.value) || 0;
+      current = Math.max(1, current + delta);
+      input.value = current;
+      updateCalculation();
+    }
+
+    // Dynamic Live Payout Calculation
+    function updateCalculation() {
+      const weight = parseFloat(document.getElementById('inputWeight').value) || 0;
+      const qualityMultiplier = parseFloat(document.getElementById('wasteQuality').value) || 1.0;
+      
+      // Calculate effective rate from active categories
+      let totalRate = 0;
+      let activeCount = 0;
+
+      for (const key in selectedCategories) {
+        if (selectedCategories[key].active) {
+          totalRate += selectedCategories[key].rate;
+          activeCount++;
+        }
+      }
+
+      const avgRate = activeCount > 0 ? (totalRate / activeCount) : 0;
+      const calculatedTotal = weight * avgRate * qualityMultiplier;
+      const calculatedPts = Math.floor(calculatedTotal / 10);
+
+      document.getElementById('calculatedCash').innerText = `${calculatedTotal.toFixed(2)} KSh`;
+      document.getElementById('calculatedPoints').innerText = `+${calculatedPts} Eco-Points`;
+    }
+
+    // Form Submission & Adding Scheduled Pickup
+    function handleFormSubmission(e) {
+      e.preventDefault();
+
+      const newId = `CLK-${Math.floor(1000 + Math.random() * 9000)}`;
+      const weightVal = document.getElementById('inputWeight').value;
+      const payoutVal = document.getElementById('calculatedCash').innerText;
+      const pickupDate = document.getElementById('pickupDate').value || 'Tomorrow';
+
+      // Gather active categories text
+      let cats = [];
+      if (selectedCategories.plastics.active) cats.push('Plastics');
+      if (selectedCategories.organic.active) cats.push('Organic');
+      if (selectedCategories.glass.active) cats.push('Glass');
+      if (selectedCategories.paper.active) cats.push('Paper');
+      if (selectedCategories.ewaste.active) cats.push('E-Waste');
+      
+      const catText = cats.length > 0 ? cats.join(', ') : 'Mixed Waste';
+
+      // Create new pickup object
+      const newPickup = {
+        id: newId,
+        categories: catText,
+        date: pickupDate,
+        weight: `${weightVal} kg`,
+        payout: payoutVal,
+        status: 'Scheduled',
+        type: 'upcoming'
+      };
+
+      pickupsList.unshift(newPickup);
+      renderPickupsTable();
+
+      // Update counters
+      const pendingCount = document.getElementById('statPendingCount');
+      pendingCount.innerText = parseInt(pendingCount.innerText) + 1;
+
+      // Show Confirmation Modal
+      document.getElementById('modalBookingId').innerText = newId;
+      document.getElementById('modalDate').innerText = `${pickupDate}, Morning Window`;
+      document.getElementById('modalPayout').innerText = payoutVal;
+      document.getElementById('bookingModal').classList.remove('hidden');
+
+      showToast(`Pickup #${newId} successfully scheduled!`);
+    }
+
+    // Render Table Rows Dynamically
+    function renderPickupsTable(filter = 'all') {
+      const tbody = document.getElementById('pickupsTableBody');
+      tbody.innerHTML = '';
+
+      const filtered = pickupsList.filter(item => {
+        if (filter === 'upcoming') return item.type === 'upcoming';
+        if (filter === 'completed') return item.type === 'completed';
+        return true;
+      });
+
+      filtered.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-gray-50/80 transition-colors';
+
+        const badgeClass = item.status.includes('Completed') ? 'bg-emerald-100 text-emerald-800' :
+                           item.status.includes('En Route') ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-800';
+
+        tr.innerHTML = `
+          <td class="py-3.5 px-3 font-bold text-gray-900">${item.id}</td>
+          <td class="py-3.5 px-3">${item.categories}</td>
+          <td class="py-3.5 px-3 text-gray-600">${item.date}</td>
+          <td class="py-3.5 px-3">${item.weight}</td>
+          <td class="py-3.5 px-3 font-bold text-emerald-700">${item.payout}</td>
+          <td class="py-3.5 px-3">
+            <span class="px-2 py-1 rounded-full text-[10px] font-bold ${badgeClass}">${item.status}</span>
+          </td>
+          <td class="py-3.5 px-3 text-right space-x-2">
+            <button onclick="viewPickupDetails('${item.id}')" class="text-emerald-700 hover:underline">Details</button>
+            ${item.type === 'upcoming' ? `<button onclick="cancelPickup('${item.id}')" class="text-red-600 hover:underline">Cancel</button>` : `<button onclick="downloadReceipt('${item.id}')" class="text-emerald-700 hover:underline">Receipt</button>`}
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Filter Pickups Tab Handler
+    function filterPickups(tab) {
+      document.getElementById('tabAll').className = "px-3 py-1.5 rounded-md text-gray-600 hover:text-gray-900";
+      document.getElementById('tabUpcoming').className = "px-3 py-1.5 rounded-md text-gray-600 hover:text-gray-900";
+      document.getElementById('tabCompleted').className = "px-3 py-1.5 rounded-md text-gray-600 hover:text-gray-900";
+
+      if (tab === 'all') document.getElementById('tabAll').className = "px-3 py-1.5 rounded-md bg-white text-gray-900 shadow-sm font-bold";
+      if (tab === 'upcoming') document.getElementById('tabUpcoming').className = "px-3 py-1.5 rounded-md bg-white text-gray-900 shadow-sm font-bold";
+      if (tab === 'completed') document.getElementById('tabCompleted').className = "px-3 py-1.5 rounded-md bg-white text-gray-900 shadow-sm font-bold";
+
+      renderPickupsTable(tab);
+    }
+
+    // Action Helpers
+    function viewPickupDetails(id) {
+      showToast(`Loading details for pickup #${id}...`);
+    }
+
+    function reschedulePickup(id) {
+      showToast(`Reschedule request opened for #${id}.`);
+      scrollToSchedule();
+    }
+
+    function cancelPickup(id) {
+      pickupsList = pickupsList.filter(p => p.id !== id);
+      renderPickupsTable();
+      showToast(`Pickup #${id} has been cancelled.`);
+    }
+
+    function downloadReceipt(id) {
+      showToast(`Downloading official waste receipt for #${id}...`);
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.add('hidden');
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastMsg').innerText = msg;
+      toast.classList.remove('hidden');
+      setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 4000);
+    }
+
+    function scrollToSchedule() {
+      document.getElementById('schedule-section').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function scrollToPickups() {
+      closeModal('bookingModal');
+      document.getElementById('pickups-section').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Initial setup on load
+    window.onload = function() {
+      // Set default pickup date to tomorrow
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      document.getElementById('pickupDate').value = tomorrow.toISOString().split('T')[0];
+
+      updateCalculation();
+    };
+  </script>
+</body>
+</html>

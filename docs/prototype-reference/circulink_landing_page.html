@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CIRCULINK - Tuna Taka Taka | Circular Waste Economy</title>
+  
+  <!-- FontAwesome & Google Fonts for Fluent typography -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    :root {
+      --fluent-primary: #107c41;        /* Environmental Emerald Green */
+      --fluent-primary-hover: #0e6b37;
+      --fluent-accent: #0078d4;         /* Fluent Blue */
+      --fluent-bg-light: #f3f3f3;
+      --fluent-card-bg: rgba(255, 255, 255, 0.75);
+      --fluent-card-border: rgba(255, 255, 255, 0.6);
+      --fluent-text-main: #242424;
+      --fluent-text-secondary: #616161;
+      --fluent-shadow-depth-8: 0 3.2px 7.2px 0 rgba(0,0,0,0.132), 0 0.6px 1.8px 0 rgba(0,0,0,0.108);
+      --fluent-shadow-depth-16: 0 6.4px 14.4px 0 rgba(0,0,0,0.132), 0 1.2px 3.6px 0 rgba(0,0,0,0.108);
+    }
+
+    body {
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+      color: var(--fluent-text-main);
+      background-color: #fafafa;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(16, 124, 65, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(0, 120, 212, 0.05) 0%, transparent 40%);
+      background-attachment: fixed;
+    }
+
+    /* Microsoft Fluent Acrylic Background Effect */
+    .fluent-acrylic {
+      background: rgba(255, 255, 255, 0.82);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+    }
+
+    .fluent-card {
+      background: #ffffff;
+      border-radius: 8px;
+      box-shadow: var(--fluent-shadow-depth-8);
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      transition: all 0.25s cubic-bezier(0.1, 0.9, 0.2, 1);
+    }
+
+    .fluent-card:hover {
+      box-shadow: var(--fluent-shadow-depth-16);
+      transform: translateY(-2px);
+    }
+
+    /* Fluent Input Focus Effect */
+    .fluent-input {
+      border: 1px solid #d1d1d1;
+      border-bottom: 2px solid #8a8a8a;
+      transition: all 0.2s ease;
+      border-radius: 4px;
+    }
+
+    .fluent-input:focus {
+      outline: none;
+      border-bottom-color: var(--fluent-primary);
+      box-shadow: 0 2px 4px rgba(16, 124, 65, 0.15);
+    }
+
+    /* Fluent Button */
+    .fluent-btn-primary {
+      background-color: var(--fluent-primary);
+      color: #ffffff;
+      border-radius: 4px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .fluent-btn-primary:hover {
+      background-color: var(--fluent-primary-hover);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+
+    .fluent-btn-secondary {
+      background-color: #f0f0f0;
+      color: var(--fluent-text-main);
+      border: 1px solid #d1d1d1;
+      border-radius: 4px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .fluent-btn-secondary:hover {
+      background-color: #e5e5e5;
+    }
+
+    /* Partner Logo Box Custom Styles */
+    .logo-container {
+      aspect-ratio: 16 / 9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.25rem;
+      background: #ffffff;
+      border-radius: 8px;
+      border: 1px solid #eaeaea;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .logo-container img {
+      max-height: 100%;
+      max-width: 100%;
+      object-fit: contain;
+      filter: grayscale(15%);
+      transition: all 0.3s ease;
+    }
+
+    .logo-container:hover {
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+      border-color: var(--fluent-primary);
+    }
+
+    .logo-container:hover img {
+      filter: grayscale(0%);
+      transform: scale(1.05);
+    }
+
+    /* Modal Animation */
+    .modal-backdrop {
+      background-color: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(4px);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+
+  <header class="sticky top-0 z-50 fluent-acrylic border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Brand Logo -->
+      <a href="#" class="flex items-center gap-3 group">
+        <div class="w-10 h-10 rounded-lg bg-emerald-700 flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-transform">
+          <i class="fa-solid fa-arrows-spin text-xl animate-spin-slow"></i>
+        </div>
+        <div>
+          <span class="text-xl font-bold tracking-tight text-gray-900 block leading-none">CIRCULINK</span>
+          <span class="text-xs font-semibold text-emerald-700 tracking-wider">TUNA TAKA TAKA</span>
+        </div>
+      </a>
+
+      <!-- Desktop Nav Menu -->
+      <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-gray-700">
+        <a href="#home" class="hover:text-emerald-700 transition-colors">Home</a>
+        <a href="#how-it-works" class="hover:text-emerald-700 transition-colors">How It Works</a>
+        <a href="#pickup" class="hover:text-emerald-700 transition-colors">Schedule Pickup</a>
+        <a href="#partners" class="hover:text-emerald-700 transition-colors">Partners</a>
+      </nav>
+
+      <!-- Auth Action Buttons -->
+      <div class="flex items-center gap-3">
+        <button onclick="openAuthModal('login')" class="fluent-btn-secondary px-4 py-2 text-sm hidden sm:inline-block">
+          <i class="fa-regular fa-user mr-1.5"></i> Log In
+        </button>
+        <button onclick="openAuthModal('register')" class="fluent-btn-primary px-4 py-2 text-sm">
+          Register
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <section id="home" class="py-12 md:py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+      
+      <div class="lg:col-span-7 space-y-6">
+        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-100/80 text-emerald-800 text-xs font-bold tracking-wide uppercase">
+          <i class="fa-solid fa-recycle text-emerald-600"></i> Empowering Kenya's Circular Future
+        </div>
+        
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-gray-900 leading-tight">
+          Tuna Taka Taka: <br>
+          <span class="text-emerald-700">From Trash to Cash!</span>
+        </h1>
+        
+        <p class="text-base sm:text-lg text-gray-600 max-w-2xl leading-relaxed">
+          Circulink bridges households, waste collectors, and commercial recyclers. Schedule your waste pickup today, turn your recyclable materials into immediate income, and power green youth employment across Kenya.
+        </p>
+
+        <div class="flex flex-wrap gap-4 pt-2">
+          <a href="#pickup" class="fluent-btn-primary px-6 py-3.5 text-base flex items-center gap-2 shadow-lg">
+            <i class="fa-solid fa-truck-ramp-box"></i> Schedule Pickup
+          </a>
+          <button onclick="openAuthModal('register')" class="fluent-btn-secondary px-6 py-3.5 text-base">
+            Join as Collector
+          </button>
+        </div>
+
+        <!-- Impact Counter Bar -->
+        <div class="pt-8 grid grid-cols-3 gap-4 border-t border-gray-200/80">
+          <div>
+            <div class="text-2xl sm:text-3xl font-bold text-emerald-700">12,400+</div>
+            <div class="text-xs text-gray-500 font-medium">Tons Recycled</div>
+          </div>
+          <div>
+            <div class="text-2xl sm:text-3xl font-bold text-emerald-700">3,800+</div>
+            <div class="text-xs text-gray-500 font-medium">Youth Employed</div>
+          </div>
+          <div>
+            <div class="text-2xl sm:text-3xl font-bold text-emerald-700">20+</div>
+            <div class="text-xs text-gray-500 font-medium">Key Partners</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hero Visual Display Card -->
+      <div class="lg:col-span-5">
+        <div class="fluent-card p-6 sm:p-8 relative overflow-hidden bg-gradient-to-br from-emerald-50 via-white to-teal-50">
+          <div class="absolute -right-10 -bottom-10 text-emerald-100/50 text-9xl pointer-events-none">
+            <i class="fa-solid fa-seedling"></i>
+          </div>
+          
+          <div class="relative z-10 space-y-4">
+            <div class="flex items-center justify-between border-b border-gray-100 pb-4">
+              <span class="text-xs font-bold uppercase tracking-wider text-gray-400">Live Recyclable Payout Rates</span>
+              <span class="text-xs text-emerald-700 font-semibold flex items-center gap-1">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Updated Today
+              </span>
+            </div>
+
+            <div class="space-y-3">
+              <div class="flex justify-between items-center p-3 bg-white/80 rounded-lg border border-gray-100 shadow-sm">
+                <div class="flex items-center gap-3">
+                  <div class="p-2 bg-blue-50 text-blue-600 rounded"><i class="fa-solid fa-bottle-water"></i></div>
+                  <span class="font-semibold text-sm">PET Plastics</span>
+                </div>
+                <span class="font-bold text-emerald-700">KES 28 / kg</span>
+              </div>
+
+              <div class="flex justify-between items-center p-3 bg-white/80 rounded-lg border border-gray-100 shadow-sm">
+                <div class="flex items-center gap-3">
+                  <div class="p-2 bg-amber-50 text-amber-600 rounded"><i class="fa-solid fa-apple-whole"></i></div>
+                  <span class="font-semibold text-sm">Organic Waste</span>
+                </div>
+                <span class="font-bold text-emerald-700">KES 12 / kg</span>
+              </div>
+
+              <div class="flex justify-between items-center p-3 bg-white/80 rounded-lg border border-gray-100 shadow-sm">
+                <div class="flex items-center gap-3">
+                  <div class="p-2 bg-purple-50 text-purple-600 rounded"><i class="fa-solid fa-glass-water"></i></div>
+                  <span class="font-semibold text-sm">Glass Bottles</span>
+                </div>
+                <span class="font-bold text-emerald-700">KES 18 / kg</span>
+              </div>
+
+              <div class="flex justify-between items-center p-3 bg-white/80 rounded-lg border border-gray-100 shadow-sm">
+                <div class="flex items-center gap-3">
+                  <div class="p-2 bg-teal-50 text-teal-600 rounded"><i class="fa-solid fa-laptop"></i></div>
+                  <span class="font-semibold text-sm">E-Waste Scrap</span>
+                </div>
+                <span class="font-bold text-emerald-700">KES 150 / kg</span>
+              </div>
+            </div>
+
+            <div class="pt-2 text-center">
+              <p class="text-xs text-gray-500">Direct payouts via M-PESA upon pickup verification</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section id="how-it-works" class="py-12 bg-white/50 border-y border-gray-200/60">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center max-w-3xl mx-auto mb-12">
+        <h2 class="text-3xl font-bold text-gray-900">How Circulink Works</h2>
+        <p class="text-gray-600 mt-2">A simple 3-step process to turn community waste into clean income</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="fluent-card p-6 text-center space-y-3">
+          <div class="w-14 h-14 bg-emerald-100 text-emerald-800 rounded-full flex items-center justify-center text-xl font-bold mx-auto">1</div>
+          <h3 class="text-lg font-semibold text-gray-900">Separate &amp; Schedule</h3>
+          <p class="text-sm text-gray-600">Sort your recyclable waste at home or business and set a convenient pickup time online.</p>
+        </div>
+
+        <div class="fluent-card p-6 text-center space-y-3">
+          <div class="w-14 h-14 bg-emerald-100 text-emerald-800 rounded-full flex items-center justify-center text-xl font-bold mx-auto">2</div>
+          <h3 class="text-lg font-semibold text-gray-900">Smart Collection</h3>
+          <p class="text-sm text-gray-600">Our trained youth collectors arrive, weigh your sorted items, and verify material quality.</p>
+        </div>
+
+        <div class="fluent-card p-6 text-center space-y-3">
+          <div class="w-14 h-14 bg-emerald-100 text-emerald-800 rounded-full flex items-center justify-center text-xl font-bold mx-auto">3</div>
+          <h3 class="text-lg font-semibold text-gray-900">Instant Cash Payout</h3>
+          <p class="text-sm text-gray-600">Receive cash directly through M-PESA while materials go directly to certified industrial recyclers.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="pickup" class="py-16 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto w-full">
+    <div class="fluent-card p-6 sm:p-10 border border-emerald-100">
+      
+      <div class="mb-8 border-b border-gray-200 pb-4">
+        <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center gap-3">
+          <i class="fa-solid fa-calendar-check text-emerald-700"></i> Schedule a Waste Pickup
+        </h2>
+        <p class="text-sm text-gray-600 mt-1">Fill in details below to book your collection and estimate your earnings.</p>
+      </div>
+
+      <form id="pickupForm" onsubmit="handlePickupSubmit(event)" class="space-y-6">
+        
+        <!-- Form Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          
+          <div class="space-y-1">
+            <label class="block text-xs font-bold uppercase tracking-wider text-gray-600">Full Name</label>
+            <input type="text" required placeholder="Jane Doe" class="w-full p-3 fluent-input text-sm bg-white">
+          </div>
+
+          <div class="space-y-1">
+            <label class="block text-xs font-bold uppercase tracking-wider text-gray-600">Phone Number (M-PESA)</label>
+            <input type="tel" required placeholder="+254 700 000000" class="w-full p-3 fluent-input text-sm bg-white">
+          </div>
+
+          <div class="space-y-1">
+            <label class="block text-xs font-bold uppercase tracking-wider text-gray-600">Email Address</label>
+            <input type="email" placeholder="jane@example.com" class="w-full p-3 fluent-input text-sm bg-white">
+          </div>
+
+          <div class="space-y-1">
+            <label class="block text-xs font-bold uppercase tracking-wider text-gray-600">Pickup Location (County)</label>
+            <select id="countySelect" required class="w-full p-3 fluent-input text-sm bg-white">
+              <option value="">Select County...</option>
+              <option value="nairobi">Nairobi City County</option>
+              <option value="nyeri">Nyeri County</option>
+              <option value="kiambu">Kiambu County</option>
+              <option value="machakos">Machakos County</option>
+              <option value="mombasa">Mombasa County</option>
+            </select>
+          </div>
+
+          <div class="space-y-1">
+            <label class="block text-xs font-bold uppercase tracking-wider text-gray-600">Waste Category</label>
+            <select id="wasteCategory" onchange="calculatePayout()" required class="w-full p-3 fluent-input text-sm bg-white">
+              <option value="28">Plastics (PET / Rigid Packaging)</option>
+              <option value="12">Organic / Food Waste</option>
+              <option value="18">Glass &amp; Bottles</option>
+              <option value="150">E-Waste / Corporate Electronics</option>
+              <option value="15">Paper &amp; Cardboard Packaging</option>
+            </select>
+          </div>
+
+          <div class="space-y-1">
+            <label class="block text-xs font-bold uppercase tracking-wider text-gray-600">Estimated Weight (kg)</label>
+            <input type="number" id="wasteWeight" min="1" value="10" oninput="calculatePayout()" required class="w-full p-3 fluent-input text-sm bg-white">
+          </div>
+
+          <div class="space-y-1">
+            <label class="block text-xs font-bold uppercase tracking-wider text-gray-600">Preferred Date</label>
+            <input type="date" required class="w-full p-3 fluent-input text-sm bg-white">
+          </div>
+
+          <div class="space-y-1">
+            <label class="block text-xs font-bold uppercase tracking-wider text-gray-600">Pickup Time Slot</label>
+            <select required class="w-full p-3 fluent-input text-sm bg-white">
+              <option value="morning">Morning (8:00 AM - 12:00 PM)</option>
+              <option value="afternoon">Afternoon (12:00 PM - 4:00 PM)</option>
+            </select>
+          </div>
+
+        </div>
+
+        <!-- Dynamic Calculation Card -->
+        <div class="p-4 rounded-lg bg-emerald-50 border border-emerald-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-emerald-700 text-white flex items-center justify-center text-lg">
+              <i class="fa-solid fa-coins"></i>
+            </div>
+            <div>
+              <span class="text-xs uppercase font-bold text-emerald-800">Estimated Payout</span>
+              <div class="text-2xl font-bold text-emerald-900" id="estimatedPayout">KES 280.00</div>
+            </div>
+          </div>
+          <span class="text-xs text-emerald-700 font-medium text-center sm:text-right">Payout is calculated upon final weight verification by pickup team.</span>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="text-right">
+          <button type="submit" class="fluent-btn-primary px-8 py-3.5 text-base w-full sm:w-auto">
+            Confirm Pickup Schedule
+          </button>
+        </div>
+      </form>
+      
+      <!-- Toast Notice -->
+      <div id="toastMessage" class="hidden mt-4 p-4 rounded bg-emerald-800 text-white text-sm font-semibold flex items-center gap-3">
+        <i class="fa-solid fa-circle-check text-xl"></i>
+        <span>Pickup successfully scheduled! Our regional coordinator will contact you via SMS.</span>
+      </div>
+
+    </div>
+  </section>
+
+  <section id="partners" class="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+    
+    <div class="text-center max-w-3xl mx-auto mb-10">
+      <h2 class="text-3xl font-bold text-gray-900">Our Strategic Partner Ecosystem</h2>
+      <p class="text-gray-600 mt-2">Collaborating across 20 impact funders, commercial off-takers, retailers, and government authorities</p>
+    </div>
+
+    <!-- Category Headers & Pure Logo Grid -->
+    <div class="space-y-12">
+      
+      <!-- Category 1 -->
+      <div>
+        <h3 class="text-sm font-bold uppercase tracking-wider text-emerald-800 mb-4 pb-2 border-b border-emerald-200 flex items-center gap-2">
+          <i class="fa-solid fa-hand-holding-dollar"></i> 1. Development Finance Institutions &amp; Impact Funders
+        </h3>
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+          <div class="logo-container" title="AECF - Africa Enterprise Challenge Fund">
+            <img src="https://images.seeklogo.com/logo-png/50/2/aecf-logo-png_seeklogo-503463.png" alt="AECF Logo" onerror="this.src='https://placehold.co/200x100/ffffff/107c41?text=AECF'">
+          </div>
+          <div class="logo-container" title="GIZ Kenya">
+            <img src="https://images.seeklogo.com/logo-png/33/2/giz-logo-png_seeklogo-331825.png" alt="GIZ Logo" onerror="this.src='https://placehold.co/200x100/ffffff/107c41?text=GIZ+Kenya'">
+          </div>
+          <div class="logo-container" title="USAID / Prosper Africa">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/1/17/USAID-Identity-mark.svg" alt="USAID Logo" onerror="this.src='https://placehold.co/200x100/ffffff/107c41?text=USAID'">
+          </div>
+          <div class="logo-container" title="Mastercard Foundation">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/a/a4/Mastercard_2019_logo.svg" alt="Mastercard Foundation Logo" onerror="this.src='https://placehold.co/200x100/ffffff/107c41?text=Mastercard+Fdn'">
+          </div>
+          <div class="logo-container" title="UNDP Accelerator Labs">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/0/07/UNDP_logo.svg" alt="UNDP Logo" onerror="this.src='https://placehold.co/200x100/ffffff/107c41?text=UNDP'">
+          </div>
+        </div>
+      </div>
+
+      <!-- Category 2 -->
+      <div>
+        <h3 class="text-sm font-bold uppercase tracking-wider text-emerald-800 mb-4 pb-2 border-b border-emerald-200 flex items-center gap-2">
+          <i class="fa-solid fa-industry"></i> 2. Commercial Off-Takers &amp; Recyclers
+        </h3>
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+          <div class="logo-container" title="PETCO Kenya">
+            <img src="https://placehold.co/200x100/ffffff/107c41?text=PETCO+Kenya" alt="PETCO Kenya Logo">
+          </div>
+          <div class="logo-container" title="Mr. Green Africa">
+            <img src="https://placehold.co/200x100/ffffff/107c41?text=Mr.+Green+Africa" alt="Mr. Green Africa Logo">
+          </div>
+          <div class="logo-container" title="KAPU / Farmers Choice">
+            <img src="https://placehold.co/200x100/ffffff/107c41?text=KAPU+|+Farmers+Choice" alt="KAPU Logo">
+          </div>
+          <div class="logo-container" title="Frigoken">
+            <img src="https://placehold.co/200x100/ffffff/107c41?text=Frigoken" alt="Frigoken Logo">
+          </div>
+          <div class="logo-container" title="Bamburi Cement (Holcim Group)">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/2/23/Holcim_Logo.svg" alt="Bamburi Holcim Logo" onerror="this.src='https://placehold.co/200x100/ffffff/107c41?text=Bamburi+Cement'">
+          </div>
+        </div>
+      </div>
+
+      <!-- Category 3 -->
+      <div>
+        <h3 class="text-sm font-bold uppercase tracking-wider text-emerald-800 mb-4 pb-2 border-b border-emerald-200 flex items-center gap-2">
+          <i class="fa-solid fa-store"></i> 3. Retailers, FMCG &amp; Commercial Generators
+        </h3>
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+          <div class="logo-container" title="Safaricom Foundation">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Safaricom_logo.svg" alt="Safaricom Logo" onerror="this.src='https://placehold.co/200x100/ffffff/107c41?text=Safaricom'">
+          </div>
+          <div class="logo-container" title="East African Breweries Limited (EABL)">
+            <img src="https://placehold.co/200x100/ffffff/107c41?text=EABL" alt="EABL Logo">
+          </div>
+          <div class="logo-container" title="Bidco Africa">
+            <img src="https://placehold.co/200x100/ffffff/107c41?text=Bidco+Africa" alt="Bidco Logo">
+          </div>
+          <div class="logo-container" title="Carrefour Kenya">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/5/5b/Carrefour_logo.svg" alt="Carrefour Logo" onerror="this.src='https://placehold.co/200x100/ffffff/107c41?text=Carrefour'">
+          </div>
+          <div class="logo-container" title="Java House Kenya">
+            <img src="https://placehold.co/200x100/ffffff/107c41?text=Java+House" alt="Java House Logo">
+          </div>
+        </div>
+      </div>
+
+      <!-- Category 4 -->
+      <div>
+        <h3 class="text-sm font-bold uppercase tracking-wider text-emerald-800 mb-4 pb-2 border-b border-emerald-200 flex items-center gap-2">
+          <i class="fa-solid fa-building-columns"></i> 4. Government Bodies &amp; Authorities
+        </h3>
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+          <div class="logo-container" title="NEMA Kenya">
+            <img src="https://placehold.co/200x100/ffffff/107c41?text=NEMA+Kenya" alt="NEMA Logo">
+          </div>
+          <div class="logo-container" title="Nairobi City County">
+            <img src="https://placehold.co/200x100/ffffff/107c41?text=Nairobi+County" alt="Nairobi County Logo">
+          </div>
+          <div class="logo-container" title="Nyeri County Government">
+            <img src="https://placehold.co/200x100/ffffff/107c41?text=Nyeri+County" alt="Nyeri County Logo">
+          </div>
+          <div class="logo-container" title="MSEA - Micro &amp; Small Enterprises Authority">
+            <img src="https://placehold.co/200x100/ffffff/107c41?text=MSEA" alt="MSEA Logo">
+          </div>
+        </div>
+      </div>
+
+      <!-- Category 5 -->
+      <div>
+        <h3 class="text-sm font-bold uppercase tracking-wider text-emerald-800 mb-4 pb-2 border-b border-emerald-200 flex items-center gap-2">
+          <i class="fa-solid fa-graduation-cap"></i> 5. Academic &amp; Vocational Institutions
+        </h3>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+          <div class="logo-container" title="NITA - National Industrial Training Authority">
+            <img src="https://placehold.co/200x100/ffffff/107c41?text=NITA" alt="NITA Logo">
+          </div>
+          <div class="logo-container" title="DeKUT - Dedan Kimathi University of Technology">
+            <img src="https://placehold.co/200x100/ffffff/107c41?text=DeKUT" alt="DeKUT Logo">
+          </div>
+          <div class="logo-container" title="University of Nairobi">
+            <img src="https://placehold.co/200x100/ffffff/107c41?text=University+of+Nairobi" alt="UoN Logo">
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <div id="authModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 modal-backdrop">
+    <div class="fluent-card w-full max-w-md p-6 relative bg-white shadow-2xl">
+      
+      <!-- Close Button -->
+      <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-lg">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <!-- Auth Navigation Tabs -->
+      <div class="flex border-b border-gray-200 mb-6">
+        <button id="tabLogin" onclick="switchAuthTab('login')" class="flex-1 py-2 font-bold text-sm text-center border-b-2 border-emerald-700 text-emerald-800">
+          Sign In
+        </button>
+        <button id="tabRegister" onclick="switchAuthTab('register')" class="flex-1 py-2 font-bold text-sm text-center text-gray-500 hover:text-gray-700">
+          Register Account
+        </button>
+      </div>
+
+      <!-- Login Form View -->
+      <form id="formLogin" onsubmit="event.preventDefault(); alert('Login successful!'); closeAuthModal();" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Email Address</label>
+          <input type="email" required placeholder="name@domain.com" class="w-full p-2.5 fluent-input text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Password</label>
+          <input type="password" required placeholder="••••••••" class="w-full p-2.5 fluent-input text-sm">
+        </div>
+        <div class="flex justify-between items-center text-xs">
+          <a href="#" onclick="switchAuthTab('forgot')" class="text-emerald-700 hover:underline">Forgot password?</a>
+        </div>
+        <button type="submit" class="fluent-btn-primary w-full py-2.5 text-sm">Sign In</button>
+        <p class="text-xs text-center text-gray-500 pt-2">
+          Don't have an account? <a href="#" onclick="switchAuthTab('register')" class="text-emerald-700 font-bold hover:underline">Register</a>
+        </p>
+      </form>
+
+      <!-- Register Form View -->
+      <form id="formRegister" onsubmit="event.preventDefault(); alert('Account registered successfully!'); closeAuthModal();" class="space-y-4 hidden">
+        <div>
+          <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Account Type</label>
+          <select class="w-full p-2.5 fluent-input text-sm">
+            <option>Household / Individual Supplier</option>
+            <option>Youth Waste Collector</option>
+            <option>Commercial Recycler / Partner</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Full Name</label>
+          <input type="text" required placeholder="Jane Doe" class="w-full p-2.5 fluent-input text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Email</label>
+          <input type="email" required placeholder="jane@domain.com" class="w-full p-2.5 fluent-input text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Password</label>
+          <input type="password" required placeholder="••••••••" class="w-full p-2.5 fluent-input text-sm">
+        </div>
+        <button type="submit" class="fluent-btn-primary w-full py-2.5 text-sm">Create Account</button>
+        <p class="text-xs text-center text-gray-500 pt-2">
+          Already have an account? <a href="#" onclick="switchAuthTab('login')" class="text-emerald-700 font-bold hover:underline">Log in</a>
+        </p>
+      </form>
+
+      <!-- Forgot Password View -->
+      <form id="formForgot" onsubmit="event.preventDefault(); alert('Password reset link sent!'); switchAuthTab('login');" class="space-y-4 hidden">
+        <p class="text-xs text-gray-600">Enter your registered email to receive a password reset link.</p>
+        <div>
+          <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Email Address</label>
+          <input type="email" required placeholder="name@domain.com" class="w-full p-2.5 fluent-input text-sm">
+        </div>
+        <button type="submit" class="fluent-btn-primary w-full py-2.5 text-sm">Send Reset Link</button>
+        <p class="text-xs text-center pt-2">
+          <a href="#" onclick="switchAuthTab('login')" class="text-emerald-700 font-bold hover:underline">Back to Login</a>
+        </p>
+      </form>
+
+    </div>
+  </div>
+
+  <footer id="contact" class="bg-gray-900 text-gray-300 py-12 border-t border-gray-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8">
+      
+      <div class="space-y-3">
+        <div class="flex items-center gap-2 text-white font-bold text-lg">
+          <i class="fa-solid fa-arrows-spin text-emerald-500"></i> CIRCULINK
+        </div>
+        <p class="text-xs text-gray-400 leading-relaxed">
+          Tuna Taka Taka is a sustainable circular economy platform transforming Kenya's waste management into green employment opportunities for youth and women.
+        </p>
+      </div>
+
+      <div>
+        <h4 class="text-white font-semibold text-sm mb-3">Quick Navigation</h4>
+        <ul class="space-y-2 text-xs">
+          <li><a href="#home" class="hover:text-emerald-400 transition-colors">Home</a></li>
+          <li><a href="#how-it-works" class="hover:text-emerald-400 transition-colors">How It Works</a></li>
+          <li><a href="#pickup" class="hover:text-emerald-400 transition-colors">Schedule Pickup</a></li>
+          <li><a href="#partners" class="hover:text-emerald-400 transition-colors">Partner Ecosystem</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="text-white font-semibold text-sm mb-3">Contact &amp; Connect</h4>
+        <ul class="space-y-2 text-xs text-gray-400">
+          <li class="flex items-center gap-2"><i class="fa-regular fa-envelope text-emerald-500"></i> info@circulink.co.ke</li>
+          <li class="flex items-center gap-2"><i class="fa-solid fa-phone text-emerald-500"></i> +254 700 000 000</li>
+          <li class="flex items-center gap-2"><i class="fa-brands fa-x-twitter text-emerald-500"></i> @CirculinkKE</li>
+          <li class="flex items-center gap-2"><i class="fa-solid fa-location-dot text-emerald-500"></i> Nairobi &amp; Nyeri, Kenya</li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="text-white font-semibold text-sm mb-3">Circular Economy Impact</h4>
+        <p class="text-xs text-gray-400 leading-relaxed">
+          Aligned with NEMA guidelines, National Sustainable Waste Management Act, and Extended Producer Responsibility (EPR) regulations in Kenya.
+        </p>
+      </div>
+
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 mt-8 border-t border-gray-800 text-center text-xs text-gray-500">
+      &copy; 2026 CIRCULINK - Tuna Taka Taka. All rights reserved.
+    </div>
+  </footer>
+
+  <script>
+    // Dynamic Cash Calculation
+    function calculatePayout() {
+      const rate = parseFloat(document.getElementById('wasteCategory').value) || 0;
+      const weight = parseFloat(document.getElementById('wasteWeight').value) || 0;
+      const total = rate * weight;
+      document.getElementById('estimatedPayout').innerText = `KES ${total.toFixed(2)}`;
+    }
+
+    // Schedule Pickup Submit Handler
+    function handlePickupSubmit(e) {
+      e.preventDefault();
+      const toast = document.getElementById('toastMessage');
+      toast.classList.remove('hidden');
+      setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 5000);
+      document.getElementById('pickupForm').reset();
+      calculatePayout();
+    }
+
+    // Modal Control Logic
+    function openAuthModal(defaultTab) {
+      document.getElementById('authModal').classList.remove('hidden');
+      switchAuthTab(defaultTab || 'login');
+    }
+
+    function closeAuthModal() {
+      document.getElementById('authModal').classList.add('hidden');
+    }
+
+    function switchAuthTab(tab) {
+      const formLogin = document.getElementById('formLogin');
+      const formRegister = document.getElementById('formRegister');
+      const formForgot = document.getElementById('formForgot');
+      const tabLogin = document.getElementById('tabLogin');
+      const tabRegister = document.getElementById('tabRegister');
+
+      formLogin.classList.add('hidden');
+      formRegister.classList.add('hidden');
+      formForgot.classList.add('hidden');
+
+      tabLogin.className = "flex-1 py-2 font-bold text-sm text-center text-gray-500 hover:text-gray-700";
+      tabRegister.className = "flex-1 py-2 font-bold text-sm text-center text-gray-500 hover:text-gray-700";
+
+      if (tab === 'login') {
+        formLogin.classList.remove('hidden');
+        tabLogin.className = "flex-1 py-2 font-bold text-sm text-center border-b-2 border-emerald-700 text-emerald-800";
+      } else if (tab === 'register') {
+        formRegister.classList.remove('hidden');
+        tabRegister.className = "flex-1 py-2 font-bold text-sm text-center border-b-2 border-emerald-700 text-emerald-800";
+      } else if (tab === 'forgot') {
+        formForgot.classList.remove('hidden');
+      }
+    }
+
+    // Initial calculation on page load
+    window.onload = function() {
+      calculatePayout();
+    };
+  </script>
+</body>
+</html>
