@@ -1,0 +1,1 @@
+import {NextResponse} from 'next/server'; import {verifyOtp} from '@/lib/otp'; export async function POST(req:Request){try{const {email,code}=await req.json();const r=await verifyOtp(String(email).toLowerCase(),String(code));return NextResponse.json(r,{status:r.ok?200:400})}catch(e:any){return NextResponse.json({error:e?.message||'Verification failed'},{status:400})}}

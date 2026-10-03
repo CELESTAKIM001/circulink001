@@ -1,0 +1,1 @@
+import {NextResponse} from 'next/server'; import {getDb} from '@/lib/db'; export async function GET(){try{const db=await getDb();const rows=await db.collection('notifications').find({}).sort({createdAt:-1}).limit(50).toArray();return NextResponse.json(rows)}catch(e:any){return NextResponse.json({error:e?.message||'Unable to load notifications'},{status:500})}}
