@@ -1,0 +1,4 @@
+'use client';
+import Link from 'next/link';
+import { Home24Regular, LeafTwo24Regular, Person24Regular, ShoppingBag24Regular, Map24Regular } from '@fluentui/react-icons';
+export function Navigation(){return <header className="nav"><div className="container navin"><Link className="brand" href="/"><img src="/logo.png" alt="CIRCULINK logo"/><span>CIRCULINK<small>TUNA TAKA TAKA</small></span></Link><nav className="links"><Link href="/"><Home24Regular/> Home</Link><Link href="/#about"><LeafTwo24Regular/> About</Link><Link href="/marketplace"><ShoppingBag24Regular/> Marketplace</Link><Link href="/pickups"><Map24Regular/> Pickups</Link><Link href="/contact">Contact</Link></nav><div className="actions"><Link className="btn" href="/login">Sign in</Link><Link className="btn primary" href="/register"><Person24Regular/> Register</Link></div></div></header>}
